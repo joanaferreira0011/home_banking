@@ -11,8 +11,7 @@ struct account{
   float balance;
   char salt[SALT_LEN];
   char* hash;
-}balance;
-
+} balance;
 
 struct account create_account(int id, float balance, char password[MAX_PASSWORD_LEN]);
 

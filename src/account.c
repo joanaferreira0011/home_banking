@@ -30,39 +30,41 @@ char *getSha256Sum(char *str)
   return sha256;
 }
 
-
-char* generate_salt(){
-  char* salt="";
+char *generate_salt()
+{
+  char *salt = malloc (sizeof (char) * SALT_LEN);
   const char *hex_digits = "0123456789ABCDEF";
   char character[2];
   int i;
 
-  for( i = 0 ; i < SALT_LEN; i++ ) {
-    character[0]=hex_digits[ ( rand() % 16 ) ];
-    printf("%s\n",character);
+  for (i = 0; i < SALT_LEN; i++)
+  {
+    character[0] = hex_digits[(rand() % 16)];
+    //printf("%s\n", character);
     fflush(stdout);
     strcat(salt, character);
-    printf("%s\n",salt);
+    //printf("%s\n", salt);
     fflush(stdout);
   }
 
   return salt;
 }
 
-
-struct account create_account(int id, float balance, char password[MAX_PASSWORD_LEN]){
+struct account create_account(int id, float balance, char password[MAX_PASSWORD_LEN])
+{
   printf("enter");
- fflush(stdout);
+  fflush(stdout);
   struct account a;
-  a.id= id;
-  a.balance= balance;
-printf("balance");
- fflush(stdout);
+  a.id = id;
+  a.balance = balance;
+  printf("balance");
+  fflush(stdout);
   strcpy(a.salt, generate_salt());
   printf("salt");
-   fflush(stdout);
-  strcpy(a.hash, a.salt);
-  strcat(a.hash, password);
-  strcpy(a.hash, getSha256Sum(a.hash));
+  fflush(stdout);
+  char * aux = a.salt;
+  strcat(aux, password);
+  a.hash = getSha256Sum(aux);
+
   return a;
 }
