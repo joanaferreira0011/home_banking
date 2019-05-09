@@ -1,10 +1,8 @@
 #ifndef __ACCOUNT_H__
 #define __ACCOUNT_H__
+
+#include "constants.h"
 #include <string.h>
-#define WIDTH_ACCOUNT 4
-#define WIDTH_BALANCE 10
-#define  MAX_PASSWORD_LEN 20
-#define SALT_LEN 64
 
 struct account{
   int id;
