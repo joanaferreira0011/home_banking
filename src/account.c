@@ -50,12 +50,12 @@ char *generate_salt()
   return salt;
 }
 
-struct account create_account(int id, float balance, char password[MAX_PASSWORD_LEN])
+struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN])
 {
   printf("enter");
   fflush(stdout);
-  struct account a;
-  a.id = id;
+  bank_account_t a;
+  a.account_id = id;
   a.balance = balance;
   printf("balance");
   fflush(stdout);
@@ -64,7 +64,7 @@ struct account create_account(int id, float balance, char password[MAX_PASSWORD_
   fflush(stdout);
   char * aux = a.salt;
   strcat(aux, password);
-  a.hash = getSha256Sum(aux);
+  strcpy(a.hash, getSha256Sum(aux));
 
   return a;
 }
