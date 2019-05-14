@@ -10,7 +10,7 @@ BUILDDIR = build
 OBJS := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(C_FILES))
 
 #compiler options
-CFLAGS = -Wall -pedantic
+CFLAGS =  -pedantic -D_REENTRANT -pthread -Wall
 LDFLAGS =
 LDLIBS =
 
