@@ -79,7 +79,6 @@ char *generate_hash(char *str)
     close(fd2[WRITE]);
     read(fd1[READ], hash, HASH_LEN);
     hash[HASH_LEN] = '\0';
-    printf("%s\n", hash);
   }
 
   return hash;
