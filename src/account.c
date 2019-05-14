@@ -47,7 +47,7 @@ char *generate_salt()
 
 char *generate_hash(char *str)
 {
-  char *hash = malloc(sizeof(char) * (SALT_LEN + MAX_PASSWORD_LEN));
+  char *hash = malloc(sizeof(char) * (HASH_LEN);
 
   int fd1[2], fd2[2];
   pid_t pid;
