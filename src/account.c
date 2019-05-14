@@ -3,20 +3,28 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <signal.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 
 #define READ 0
 #define WRITE 1
+
+void sig_pipe(int signo)
+{
+  printf("SIGPIPE caught\n");
+  exit(1);
+}
 
 void err_sys(char *msg)
 {
   fprintf(stderr, "%s\n", msg);
   exit(1);
+}
+
+void err_msg(char *msg)
+{
+  printf("%s\n", msg);
+  return;
 }
 
 char *generate_salt()
@@ -44,12 +52,16 @@ char *generate_hash(char *str)
   int fd1[2], fd2[2];
   pid_t pid;
 
+  if (signal(SIGPIPE, sig_pipe) == SIG_ERR)
+    err_sys("signal error");
+
   if (pipe(fd1) < 0 || pipe(fd2) < 0)
     err_sys("pipe error");
+
   if ((pid = fork()) < 0)
     err_sys("fork error");
 
-  if (pid == 0) /*child*/
+  if (pid == 0) /* child*/
   {
     close(fd2[WRITE]);
     close(fd1[READ]);
@@ -58,6 +70,7 @@ char *generate_hash(char *str)
     execlp("sha256sum", "sha256sum", NULL);
     exit(0);
   }
+
   else /*parent*/
   {
     close(fd1[WRITE]);
