@@ -19,5 +19,4 @@ void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices);
  */
 int add_account(bank_account_t account);
 
-
 void create_bank(init_bank_t bank);
