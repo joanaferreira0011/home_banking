@@ -1,6 +1,5 @@
 #include "parser.h"
 #include "string.h"
-#include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 
