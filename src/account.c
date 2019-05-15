@@ -63,8 +63,8 @@ char *generate_hash(char *str)
 
   if (pid == 0) /* child*/
   {
-    close(fd2[WRITE]);
     close(fd1[READ]);
+    close(fd2[WRITE]);
     dup2(fd2[READ], STDIN_FILENO);
     dup2(fd1[WRITE], STDOUT_FILENO);
     execlp("sha256sum", "sha256sum", NULL);
@@ -78,7 +78,6 @@ char *generate_hash(char *str)
     write(fd2[WRITE], str, HASH_LEN);
     close(fd2[WRITE]);
     read(fd1[READ], hash, HASH_LEN);
-    hash[HASH_LEN] = '\0';
   }
 
   return hash;
