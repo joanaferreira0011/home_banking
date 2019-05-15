@@ -1,6 +1,6 @@
 #include "user_secure_srv.h"
 
-void user_open_secure_srv(char* msg)
+void user_open_secure_srv(char *msg)
 {
     int fd;
     fd = open(SERVER_FIFO_PATH, O_WRONLY);
@@ -15,5 +15,4 @@ void user_open_secure_srv(char* msg)
 
     write(fd, msg, strlen(msg) + 1);
     close(fd);
-    
 }

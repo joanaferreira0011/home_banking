@@ -1,10 +1,11 @@
 #ifndef __HOME_BANKING_USER_ARGS_H__
 #define __HOME_BANKING_USER_ARGS_H__
-#include "types.h"
-#include "constants.h"
+
+#include "../auxiliary_src/types.h"
+#include "../auxiliary_src/constants.h"
 
 #define EXPECTED_ARGC 6
 
-int process_arguments(int argc, char **argv, tlv_request_t *buffer);
+tlv_request_t process_arguments(char **argv);
 
-#endif/*__HOME_BANKING_USER_ARGS_H__*/
+#endif /*__HOME_BANKING_USER_ARGS_H__*/

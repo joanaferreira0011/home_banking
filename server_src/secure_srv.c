@@ -24,7 +24,7 @@ int create_secure_srv()
     } while (strcmp(str, "SHUTDOWN") != 0);
 
     close(fd);
-    
+
     if (unlink(SERVER_FIFO_PATH) < 0)
         printf("Error when destroying FIFO '/tmp/secure_srv'\n");
     else
