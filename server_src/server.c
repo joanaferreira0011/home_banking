@@ -3,6 +3,7 @@
 #include "account.h"
 #include "parser.h"
 #include "secure_srv.h"
+#include "srv_accounts.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,10 +13,6 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  bank_account_t admin_account =create_account(ADMIN_ACCOUNT_ID,0, bank.admin_password);
-  bank_office_t *offices = malloc(bank.n_bank_offices*sizeof(bank_office_t));
-  create_bank_offices(bank.n_bank_offices, offices);
+  create_bank(bank);
 
-  create_secure_srv();
 }
-
