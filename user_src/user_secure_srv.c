@@ -3,7 +3,7 @@
 void user_open_secure_srv(char* msg)
 {
     int fd;
-    fd = open("/tmp/secure_srv", O_WRONLY);
+    fd = open(SERVER_FIFO_PATH, O_WRONLY);
 
     if (fd == -1)
     {
@@ -11,7 +11,7 @@ void user_open_secure_srv(char* msg)
         exit(1);
     }
 
-    printf("FIFO 'requests' openned in WRITEONLY mode\n");
+    printf("FIFO 'secure' openned in WRITEONLY mode\n");
 
     write(fd, msg, strlen(msg) + 1);
     close(fd);

@@ -5,7 +5,7 @@ int create_secure_srv()
     int fd, n;
     char str[MAX_MSG_LEN];
 
-    if (mkfifo("/tmp/secure_srv", 0660) < 0)
+    if (mkfifo(SERVER_FIFO_PATH, 0660) < 0)
         if (errno == EEXIST)
             printf("FIFO '/tmp/secure_srv' already exists\n");
         else
@@ -13,7 +13,7 @@ int create_secure_srv()
     else
         printf("FIFO '/tmp/secure_srv' sucessfully created\n");
 
-    if ((fd = open("/tmp/secure_srv", O_RDONLY)) != -1)
+    if ((fd = open(SERVER_FIFO_PATH, O_RDONLY)) != -1)
         printf("FIFO '/tmp/secure_srv' openned in READONLY mode\n");
 
     do
@@ -25,7 +25,7 @@ int create_secure_srv()
 
     close(fd);
     
-    if (unlink("/tmp/secure_srv") < 0)
+    if (unlink(SERVER_FIFO_PATH) < 0)
         printf("Error when destroying FIFO '/tmp/secure_srv'\n");
     else
         printf("FIFO '/tmp/secure_srv' has been destroyed\n");

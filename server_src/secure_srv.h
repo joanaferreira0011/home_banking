@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#include "../auxiliary_src/constants.h"
 
 #define MAX_MSG_LEN 20
 
