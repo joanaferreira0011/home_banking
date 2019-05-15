@@ -19,7 +19,7 @@ int process_arguments(int argc, char **argv, tlv_request_t *buffer) {
     }
     
     int userid;
-    if ((userid = non_neg_atoi(argv[USERID_INDEX]) == -1) {
+    if (userid = non_neg_atoi(argv[USERID_INDEX]) == -1) {
     	return 1;
     }
     
@@ -28,8 +28,8 @@ int process_arguments(int argc, char **argv, tlv_request_t *buffer) {
     	return 1;
     }
     
-    op_type_t opcode = non_neg_atoi(argc[OPCODE_INDEX]);
-    char **opargs = separate_args(argv[OPARGS_INDEX])
+    op_type_t opcode = non_neg_atoi(argv[OPCODE_INDEX]);
+    char **opargs = separate_args(argv[OPARGS_INDEX]);
     switch (opcode) {
     	case OP_CREATE_ACCOUNT:
             

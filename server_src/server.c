@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "account.h"
 #include "parser.h"
+#include "secure_srv.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,5 +16,6 @@ int main(int argc, char *argv[])
   bank_office_t *offices = malloc(bank.n_bank_offices*sizeof(bank_office_t));
   create_bank_offices(bank.n_bank_offices, offices);
 
-  return 0;
+  create_secure_srv();
 }
+
