@@ -2,26 +2,27 @@
 #include <stdio.h>
 #include "init_bank.h"
 
+
 void *PrintHello(void *threadnum)
 {
   printf("Thread %d: Hello World!\n",
   *(int *)threadnum);
+  fflush(stdout);
   pthread_exit(NULL);
 }
 
-void create_bank_offices(uint32_t n_bank_offices){
+void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices){
 
-  printf("nbank: %u\n", n_bank_offices);
-
-  int thrarg[n_bank_offices];
-  pthread_t threads[n_bank_offices];
-  
   for(uint32_t t=0; t<n_bank_offices; t++){
-    thrarg[t] = t+1;
-    printf("Creating thread %d\n", t);
-    pthread_create(&threads[t], NULL,
-    PrintHello,
-    &thrarg[t]);
+    offices[t].number=t+1;
   }
+
+  for(uint32_t t=0; t<n_bank_offices; t++){
+
+    pthread_create(&(offices[t].thread), NULL,
+    PrintHello,
+    &(offices[t].number));
+  }
+
 
 }
