@@ -5,6 +5,6 @@
 
 #define EXPECTED_ARGC 6
 
-int process_arguments(char ** args, tlv_request_t *buffer);
+int process_arguments(int argc, char **argv, tlv_request_t *buffer);
 
 #endif/*__HOME_BANKING_USER_ARGS_H__*/

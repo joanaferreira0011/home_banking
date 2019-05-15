@@ -8,7 +8,4 @@ clean:
 	+$(MAKE) -C server_src clean
 	+$(MAKE) -C user_src clean
 
-$(BUILDDIR):
-	mkdir $(BUILDDIR)
-
 .PHONY: clean depend

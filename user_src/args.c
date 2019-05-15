@@ -8,10 +8,14 @@
 #define OPARGS_INDEX 5
 
 /* Extracts positive number / zero from string and returns it, will return -1 if an error occurs */
-int non_neg_atoi(char *str);
+int non_neg_atoi(char *str) {
+    return -1;
+}
 
 /* Separates the arguments from an argument string */
-char **separate_args(char *arg_str);
+char **separate_args(char *arg_str) {
+    return 0;
+}
 
 int process_arguments(int argc, char **argv, tlv_request_t *buffer) {
     if (argc != EXPECTED_ARGC || argv == NULL || buffer == NULL) {
@@ -19,7 +23,7 @@ int process_arguments(int argc, char **argv, tlv_request_t *buffer) {
     }
     
     int userid;
-    if (userid = non_neg_atoi(argv[USERID_INDEX]) == -1) {
+    if ((userid = non_neg_atoi(argv[USERID_INDEX])) == -1) {
     	return 1;
     }
     
@@ -44,7 +48,7 @@ int process_arguments(int argc, char **argv, tlv_request_t *buffer) {
     		break;
     }
 
-
+    return 0;
 }
 
 
