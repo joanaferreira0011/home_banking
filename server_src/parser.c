@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int get_bank_init_details(char* command[], struct init_bank* bank_details){
+int get_bank_init_details(char* command[], init_bank_t* bank_details){
   if(atoi(command[1])>MAX_BANK_OFFICES){
     return -1;
   }
