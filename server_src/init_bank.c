@@ -66,4 +66,6 @@ int transfer(uint32_t src, u_int32_t dest, uint32_t amount)
 
   srv_accounts[src].account.balance = srv_accounts[src].account.balance - amount;
   srv_accounts[dest].account.balance = srv_accounts[dest].account.balance + amount;
+
+  return 0;
 }
