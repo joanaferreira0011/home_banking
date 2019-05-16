@@ -33,14 +33,15 @@ tlv_request_t process_arguments(char **argv)
 
     op_type_t operation = __ATOUL(argv[OPCODE_INDEX]);
     char **opargs = separate_args(argv[OPARGS_INDEX]);
-    switch (operation)
-    {
-    case OP_CREATE_ACCOUNT:
-        value.create = new_create_account_message(opargs);
-        break;
-    case OP_TRANSFER:
-        value.transfer = new_transfer_message(opargs);
-        break;
+    switch (operation) {
+        case OP_CREATE_ACCOUNT:
+            value.create = new_create_account_message(opargs);
+            break;
+        case OP_TRANSFER:
+            value.transfer = new_transfer_message(opargs);
+            break;
+        default:
+            break;
     }
     string_array_free_elements(opargs);
 

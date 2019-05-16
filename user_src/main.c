@@ -1,10 +1,15 @@
-#include "user_secure_srv.h"
+#include "communication.h"
 #include "../auxiliary_src/types.h"
 #include "../auxiliary_src/constants.h"
 #include "stdlib.h"
 #include "stdio.h"
 #include "debug.h"
 #include "unistd.h"
+#include "args.h"
+
+int set_up_alarm() {
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +28,7 @@ int main(int argc, char *argv[])
 
     __debug_log("main: starting connection to server fifo");
     if (open_connection_to_srv()) {
-        fprintf(stderr, "main: Could not connect to %s\n", SERVER_FIFO_PATH)
+        fprintf(stderr, "main: Could not connect to %s\n", SERVER_FIFO_PATH);
         exit(EXIT_FAILURE);
     }
 
@@ -54,5 +59,5 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     
-
+    exit(EXIT_SUCCESS);
 }
