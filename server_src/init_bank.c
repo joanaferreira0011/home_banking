@@ -16,8 +16,6 @@ void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
                    execute_bank_office,
                    &(offices[t].number));
   }
-
-
 }
 
 void init_bank_accounts()
@@ -43,13 +41,29 @@ void create_bank(init_bank_t bank)
 int add_account(bank_account_t account)
 {
   pthread_mutex_lock(&srv_accounts[account.account_id].mut);
-  if(srv_accounts[account.account_id].account.account_id== EMPTY_BANK_ACCOUNT_ID){
-    srv_accounts[account.account_id].account= account;
+  if (srv_accounts[account.account_id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
+  {
+    srv_accounts[account.account_id].account = account;
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
     return 0;
   }
-    else{
-      pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
-      return 1;
+  else
+  {
+    pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
+    return 1;
+  }
 }
+
+uint32_t check_balance(uint32_t id)
+{
+  return srv_accounts[id].account.balance;
+}
+
+int transfer(uint32_t src, u_int32_t dest, uint32_t amount)
+{
+  if (check_balance(src) < amount)
+    return -1;
+
+  srv_accounts[src].account.balance = srv_accounts[src].account.balance - amount;
+  srv_accounts[dest].account.balance = srv_accounts[dest].account.balance + amount;
 }
