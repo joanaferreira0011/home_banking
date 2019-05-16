@@ -16,10 +16,7 @@ int main(int argc, char *argv[])
   init_bank_t bank;
 
   if (get_bank_init_details(argv, &bank) == -1)
-  {
-    fprintf(stderr, "Error: to many bank offices.\n");
-    return -1;
-  }
+    exit(EXIT_FAILURE);
 
   create_bank(bank);
 }
