@@ -1,13 +1,4 @@
 #include "account.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
-#include <string.h>
-
-#define READ 0
-#define WRITE 1
 
 void sig_pipe(int signo)
 {
@@ -27,24 +18,7 @@ void err_msg(char *msg)
   return;
 }
 
-char *generate_salt()
-{
-  char *salt = malloc(sizeof(char) * SALT_LEN);
-  const char *hex_digits = "0123456789ABCDEF";
-  char character[2];
-  int i;
-
-  for (i = 0; i < SALT_LEN; i++)
-  {
-    character[0] = hex_digits[(rand() % 16)];
-    fflush(stdout);
-    strcat(salt, character);
-    fflush(stdout);
-  }
-
-  return salt;
-}
-
+//Generates the account's hash
 char *generate_hash(char *str)
 {
   char *hash = malloc(sizeof(char) * HASH_LEN);
@@ -81,6 +55,25 @@ char *generate_hash(char *str)
   }
 
   return hash;
+}
+
+//Generates the account's salt
+char *generate_salt()
+{
+  char *salt = malloc(sizeof(char) * SALT_LEN);
+  const char *hex_digits = "0123456789ABCDEF";
+  char character[2];
+  int i;
+
+  for (i = 0; i < SALT_LEN; i++)
+  {
+    character[0] = hex_digits[(rand() % 16)];
+    fflush(stdout);
+    strcat(salt, character);
+    fflush(stdout);
+  }
+
+  return salt;
 }
 
 struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN])

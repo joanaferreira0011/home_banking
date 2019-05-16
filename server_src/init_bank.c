@@ -1,9 +1,4 @@
-#include <pthread.h>
-#include <stdio.h>
 #include "init_bank.h"
-#include "srv_accounts.h"
-#include <stdlib.h>
-#include "secure_srv.h"
 
 void *PrintHello(void *threadnum)
 {
@@ -13,19 +8,7 @@ void *PrintHello(void *threadnum)
   pthread_exit(NULL);
 }
 
-int add_account(bank_account_t account)
-{
-  for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
-  {
-    if (srv_accounts[i].account_id == EMPTY_BANK_ACCOUNT_ID)
-    {
-      srv_accounts[i] = account;
-      return 0;
-    }
-  }
-  return 1;
-}
-
+//Creates threads for the bank offices
 void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
 {
 
@@ -43,6 +26,7 @@ void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
   }
 }
 
+//Makes all the bank accounts empty
 void init_bank_accounts()
 {
   for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
@@ -59,4 +43,17 @@ void create_bank(init_bank_t bank)
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
   create_bank_offices(bank.n_bank_offices, srv_offices);
   //create_secure_srv();
+}
+
+int add_account(bank_account_t account)
+{
+  for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
+  {
+    if (srv_accounts[i].account_id == EMPTY_BANK_ACCOUNT_ID)
+    {
+      srv_accounts[i] = account;
+      return 0;
+    }
+  }
+  return 1;
 }

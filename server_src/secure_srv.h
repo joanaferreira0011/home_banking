@@ -11,4 +11,9 @@
 
 #define MAX_MSG_LEN 20
 
-int create_secure_srv();
+/**
+ * @brief Creates secure_srv FIFO
+ *
+ * @return
+ */
+void create_secure_srv();

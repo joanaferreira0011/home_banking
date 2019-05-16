@@ -1,7 +1,4 @@
 #include "parser.h"
-#include "string.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 int get_bank_init_details(char *command[], init_bank_t *bank_details)
 {

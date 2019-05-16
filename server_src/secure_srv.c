@@ -1,6 +1,6 @@
 #include "secure_srv.h"
 
-int create_secure_srv()
+void create_secure_srv()
 {
     int fd, n;
     char str[MAX_MSG_LEN];
