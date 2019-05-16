@@ -16,4 +16,6 @@ int send_request(tlv_request_t request);
 
 int read_response(char *response_str);
 
+int close_connection_to_srv();
+
 void user_open_secure_srv();

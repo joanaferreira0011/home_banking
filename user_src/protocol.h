@@ -1,4 +1,4 @@
-#define __USER_PROTOCOL_H__ //disables header
+//#define __USER_PROTOCOL_H__ //disables header
 #ifndef __USER_PROTOCOL_H__
 #define __USER_PROTOCOL_H__
 

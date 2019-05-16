@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     __debug_log("main: opening local fifo");
     if (open_local_fifo()) {
-        fprintf(stderr, "main: could not create %s%d\n", USER_FIFO_PATH_PREFIX, getpid());
+        fprintf(stderr, "main: could not create %s%05d\n", USER_FIFO_PATH_PREFIX, getpid());
         exit(EXIT_FAILURE);
     }
 
@@ -43,7 +43,13 @@ int main(int argc, char *argv[])
 
     __debug_log("main: trying to send request");
     if (send_request(request)) {
-        __debug_log("main: failed to send request");
+        fprintf(stderr, "main: failed to send request");
+        exit(EXIT_FAILURE);
+    }
+
+    __debug_log("main: closing connection to server fifo");
+    if (close_connection_to_srv()) {
+        fprintf(stderr, "main: could not close connection to %s\n", SERVER_FIFO_PATH);
         exit(EXIT_FAILURE);
     }
 
