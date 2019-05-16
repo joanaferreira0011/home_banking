@@ -24,14 +24,15 @@ void init_bank_accounts()
 {
   for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
   {
-    srv_accounts[i].account_id = EMPTY_BANK_ACCOUNT_ID;
+    srv_accounts[i].account.account_id = EMPTY_BANK_ACCOUNT_ID;
+    pthread_mutex_init(&(srv_accounts[i].mut), NULL);
   }
 }
 
 void create_bank(init_bank_t bank)
 {
   init_bank_accounts();
-  pthread_mutex_init(&mut_srv_accounts, NULL);
+
   bank_account_t admin_account = create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password);
   add_account(admin_account);
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
@@ -41,13 +42,14 @@ void create_bank(init_bank_t bank)
 
 int add_account(bank_account_t account)
 {
-  for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
-  {
-    if (srv_accounts[i].account_id == EMPTY_BANK_ACCOUNT_ID)
-    {
-      srv_accounts[i] = account;
-      return 0;
-    }
+  pthread_mutex_lock(&srv_accounts[account.account_id].mut);
+  if(srv_accounts[account.account_id].account.account_id== EMPTY_BANK_ACCOUNT_ID){
+    srv_accounts[account.account_id].account= account;
+    pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
+    return 0;
   }
-  return 1;
+    else{
+      pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
+      return 1;
+}
 }

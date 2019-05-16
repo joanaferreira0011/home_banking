@@ -20,6 +20,12 @@ int main(int argc, char *argv[])
 
   create_bank(bank);
 
+// while(1){
+//   for(int i=0; i< 20; i++){
+//     printf("no: %u\n", srv_accounts[i].account.account_id);
+//   }
+//   sleep(5)
+// }
 
 
 }

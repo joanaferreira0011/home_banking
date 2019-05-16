@@ -15,9 +15,15 @@
 
 /**
  * @brief Creates bank account
- * 
+ *
  * @return struct bank account with the created account data
  */
 struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN]);
+
+typedef struct srv_account{
+  bank_account_t account;
+  pthread_mutex_t mut;
+} srv_account_t;
+
 
 #endif
