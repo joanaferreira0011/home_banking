@@ -3,7 +3,7 @@
 #include "account.h"
 #include "parser.h"
 #include "secure_srv.h"
-#include "srv_accounts.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -19,4 +19,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
 
   create_bank(bank);
+
+
+
 }

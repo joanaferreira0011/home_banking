@@ -1,13 +1,5 @@
 #include "init_bank.h"
 
-void *PrintHello(void *threadnum)
-{
-  printf("Thread %d: Hello World!\n",
-         *(int *)threadnum);
-  fflush(stdout);
-  pthread_exit(NULL);
-}
-
 //Creates threads for the bank offices
 void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
 {
@@ -21,12 +13,13 @@ void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
   {
 
     pthread_create(&(offices[t].thread), NULL,
-                   PrintHello,
+                   execute_bank_office,
                    &(offices[t].number));
   }
+
+
 }
 
-//Makes all the bank accounts empty
 void init_bank_accounts()
 {
   for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
@@ -38,6 +31,7 @@ void init_bank_accounts()
 void create_bank(init_bank_t bank)
 {
   init_bank_accounts();
+  pthread_mutex_init(&mut_srv_accounts, NULL);
   bank_account_t admin_account = create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password);
   add_account(admin_account);
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));

@@ -10,6 +10,7 @@
 #include "srv_accounts.h"
 #include "../auxiliary_src/types.h"
 
+extern pthread_mutex_t mut_srv_accounts;
 /**
  * @brief Init bank account information.
  */
@@ -27,10 +28,10 @@ typedef struct init_bank
 int add_account(bank_account_t account);
 
 /**
- * @brief All the accounts are set too empty, 
- *        adds the admin account and bank offices 
+ * @brief All the accounts are set too empty,
+ *        adds the admin account and bank offices
  *        and starts the FIFO secure_srv
- * 
+ *
  * @return
  */
 void create_bank(init_bank_t bank);
