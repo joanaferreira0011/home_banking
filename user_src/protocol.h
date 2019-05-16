@@ -8,4 +8,4 @@ char *serialize_request(tlv_request_t request);
 
 tlv_reply_t deserialize_reply(char *serialized_reply);
 
-#endif /*__USER_PROTOCOL_H__*/
+#endif/*__USER_PROTOCOL_H__*/
