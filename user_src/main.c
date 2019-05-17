@@ -6,8 +6,15 @@
 #include "debug.h"
 #include "unistd.h"
 #include "args.h"
+#include "signal.h"
+
+void alarm_signal_handler(int signal) {
+    __debug_log("main::alarm_signal_handler: handling SIGALRM");
+}
 
 int set_up_alarm() {
+    __debug_log("main::set_up_alarm: entered function");
+    signal(SIGALRM, alarm_signal_handler);
     return 0;
 }
 
@@ -17,12 +24,12 @@ int main(int argc, char *argv[])
     if (argc != 6) {
         __debug_log("main: argc was not 6, printing usage and quitting");
         printf("Usage: %s %s %s %s %s %s\n",
-            argv[0],
-            "account_id",
-            "\"password\"",
-            "op_delay_in_ms",
-            "op_code",
-            "\"op_arguments\"");
+        argv[0],
+        "account_id",
+        "\"password\"",
+        "op_delay_in_ms",
+        "op_code",
+        "\"op_arguments\"");
         exit(EXIT_FAILURE);
     }
 
@@ -59,11 +66,11 @@ int main(int argc, char *argv[])
     __debug_log("main: starting alarm");
     alarm(FIFO_TIMEOUT_SECS);
 
-    char *response_str = NULL;
-    if (read_response(response_str)) {
+    tlv_reply_t reply;
+    if (read_response(&reply)) {
         __debug_log("main: timed out");
         exit(EXIT_FAILURE);
     }
-    
+
     exit(EXIT_SUCCESS);
 }
