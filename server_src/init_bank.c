@@ -109,7 +109,6 @@ ret_code_t check_balance(uint32_t id)
 
 ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount)
 {
-
   if (src == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
@@ -122,6 +121,9 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount)
 
   if (!check_dest)
     return RC_ID_NOT_FOUND;
+
+  if (src == dest)
+    return RC_SAME_ID;
 
   pthread_mutex_lock(&srv_accounts[src].mut);
   pthread_mutex_lock(&srv_accounts[dest].mut);
