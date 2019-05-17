@@ -10,19 +10,16 @@ void *execute_bank_office(void *threadnum)
   // fflush(stdout);
   // pthread_exit(NULL);
 
-  printf("Started thread %d\n",
-         *(int *)threadnum);
+  printf("Started thread %d\n", *(int *)threadnum);
      //pthread_mutex_lock(&mut_srv_accounts);
      // if (pos >= npos) {
      // pthread_mutex_unlock(&mut_srv_accounts);
      // return NULL;
      // }
-     printf("thread %d entered critical zone\n",
-            *(int *)threadnum);
+     printf("thread %d entered critical zone\n", *(int *)threadnum);
 
-     //create_account(*(uint32_t *)threadnum,0 , "oijsbhds");
+     create_account(*(uint32_t *)threadnum,0 , "oijsbhds");
 
-     add_account(srv_accounts[ADMIN_ACCOUNT_ID].account);
      printf("thread %d added account\n",*(int *)threadnum);
      //pthread_mutex_unlock(&mut_srv_accounts);
 
