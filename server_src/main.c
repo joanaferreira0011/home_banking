@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 
   int fd, n;
   tlv_request_t request;
+  ret_code_t rc = RC_OK;
 
   if (mkfifo(SERVER_FIFO_PATH, 0660) < 0)
     if (errno == EEXIST)
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
       read(fd, &request.value, request.length);
       process_request(request);
     }
-  } while (!shutdown(request, srv_accounts[ADMIN_ACCOUNT_ID].account));
+  } while (rc != shutdown(request, srv_accounts[ADMIN_ACCOUNT_ID].account));
 
   close(fd);
 

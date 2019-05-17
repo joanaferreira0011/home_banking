@@ -142,15 +142,18 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount)
   return RC_OK;
 }
 
-int shutdown(tlv_request_t request, bank_account_t admin_account)
+ret_code_t shutdown(tlv_request_t request, bank_account_t admin_account)
 {
+  if (request.value.header.account_id != ADMIN_ACCOUNT_ID) 
+    return RC_OP_NALLOW;
+    
   if (request.type == OP_SHUTDOWN)
   {
-    if (verify_account(request.value.header.account_id, request.value.header.password, admin_account))
-      return 0;
+    if (!(verify_account(request.value.header.account_id, request.value.header.password, admin_account)))
+      return RC_OTHER;
   }
 
-  return -1;
+  return RC_OK;
 }
 
 ret_code_t process_request(tlv_request_t request)

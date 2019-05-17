@@ -38,6 +38,6 @@ int create_bank(init_bank_t bank);
 
 ret_code_t create_account(int id, float balance, char *password);
 
-int shutdown(tlv_request_t request, bank_account_t admin_account);
+ret_code_t shutdown(tlv_request_t request, bank_account_t admin_account);
 
 ret_code_t process_request(tlv_request_t request);
