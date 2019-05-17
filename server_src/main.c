@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
   if (get_bank_init_details(argv, &bank) == -1)
     exit(EXIT_FAILURE);
 
+  create_bank(bank);
 
-  bank_account_t admin_account = create_bank(bank);
   int fd, n;
   tlv_request_t request;
 
@@ -48,8 +48,9 @@ int main(int argc, char *argv[])
     {
       read(fd, &request.length, sizeof(uint32_t));
       read(fd, &request.value, request.length);
+      process_request(request);
     }
-  } while (!shutdown(request, admin_account));
+  } while (!shutdown(request, srv_accounts[ADMIN_ACCOUNT_ID].account));
 
   close(fd);
 

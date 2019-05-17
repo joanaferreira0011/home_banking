@@ -24,9 +24,11 @@ typedef struct srv_account{
  *
  * @return struct bank account with the created account data
  */
-struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN]);
+//struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN]);
 
 
 char *generate_hash(char *str);
+
+char *generate_salt();
 
 #endif
