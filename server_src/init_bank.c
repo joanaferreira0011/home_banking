@@ -35,7 +35,7 @@ bank_account_t create_bank(init_bank_t bank)
   add_account(admin_account);
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
   create_bank_offices(bank.n_bank_offices, srv_offices);
-  
+
   return admin_account;
 }
 
@@ -72,17 +72,23 @@ int verify_account(uint32_t id, char *password, bank_account_t acc)
 
 uint32_t check_balance(uint32_t id)
 {
+  pthread_mutex_lock(&srv_accounts[id].mut);
   return srv_accounts[id].account.balance;
+  pthread_mutex_unlock(&srv_accounts[id].mut);
 }
 
 int transfer(uint32_t src, u_int32_t dest, uint32_t amount)
 {
+
   if (check_balance(src) < amount)
     return -1;
 
+  pthread_mutex_lock(&srv_accounts[src].mut);
+  pthread_mutex_lock(&srv_accounts[dest].mut);
   srv_accounts[src].account.balance = srv_accounts[src].account.balance - amount;
   srv_accounts[dest].account.balance = srv_accounts[dest].account.balance + amount;
-
+  pthread_mutex_unlock(&srv_accounts[src].mut);
+  pthread_mutex_unlock(&srv_accounts[dest].mut);
   return 0;
 }
 
