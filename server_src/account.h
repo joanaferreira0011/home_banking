@@ -6,12 +6,18 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
+#include "pthread.h"
 #include <sys/types.h>
 #include "../auxiliary_src/constants.h"
 #include "../auxiliary_src/types.h"
 
 #define READ 0
 #define WRITE 1
+
+typedef struct srv_account{
+  bank_account_t account;
+  pthread_mutex_t mut;
+} srv_account_t;
 
 /**
  * @brief Creates bank account
@@ -20,10 +26,7 @@
  */
 struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN]);
 
-typedef struct srv_account{
-  bank_account_t account;
-  pthread_mutex_t mut;
-} srv_account_t;
 
+char *generate_hash(char *str);
 
 #endif

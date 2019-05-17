@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <pthread.h>
 #include "account.h"
-#include "secure_srv.h"
 #include "bank_office.h"
 #include "srv_accounts.h"
 #include "../auxiliary_src/types.h"
@@ -34,4 +33,6 @@ int add_account(bank_account_t account);
  *
  * @return
  */
-void create_bank(init_bank_t bank);
+bank_account_t create_bank(init_bank_t bank);
+
+int shutdown(tlv_request_t request, bank_account_t admin_account);
