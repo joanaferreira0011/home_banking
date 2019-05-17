@@ -27,7 +27,7 @@ void init_bank_accounts()
   }
 }
 
-void create_bank(init_bank_t bank)
+bank_account_t create_bank(init_bank_t bank)
 {
   init_bank_accounts();
 
@@ -35,7 +35,8 @@ void create_bank(init_bank_t bank)
   add_account(admin_account);
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
   create_bank_offices(bank.n_bank_offices, srv_offices);
-  //create_secure_srv();
+  
+  return admin_account;
 }
 
 int add_account(bank_account_t account)
@@ -54,6 +55,21 @@ int add_account(bank_account_t account)
   }
 }
 
+int verify_account(uint32_t id, char *password, bank_account_t acc)
+{
+  char *hash = malloc(sizeof(char) * HASH_LEN);
+
+  char *aux = acc.salt;
+  strcat(aux, password);
+
+  hash = generate_hash(aux);
+
+  if (id == acc.account_id && strcmp(hash, acc.hash) == 0)
+    return 0;
+
+  return -1;
+}
+
 uint32_t check_balance(uint32_t id)
 {
   return srv_accounts[id].account.balance;
@@ -68,4 +84,15 @@ int transfer(uint32_t src, u_int32_t dest, uint32_t amount)
   srv_accounts[dest].account.balance = srv_accounts[dest].account.balance + amount;
 
   return 0;
+}
+
+int shutdown(tlv_request_t request, bank_account_t admin_account)
+{
+    if (request.type == OP_SHUTDOWN)
+    {
+        if (verify_account(request.value.header.account_id, request.value.header.password, admin_account))
+            return 0;
+    }
+
+    return -1;
 }
