@@ -25,10 +25,11 @@ int main(int argc, char *argv[])
   if (get_bank_init_details(argv, &bank) == -1)
     exit(EXIT_FAILURE);
 
+  create_bank(bank);
 
-  bank_account_t admin_account = create_bank(bank);
   int fd, n;
   tlv_request_t request;
+  ret_code_t rc = RC_OK;
 
   if (mkfifo(SERVER_FIFO_PATH, 0660) < 0)
     if (errno == EEXIST)
@@ -48,8 +49,9 @@ int main(int argc, char *argv[])
     {
       read(fd, &request.length, sizeof(uint32_t));
       read(fd, &request.value, request.length);
+      process_request(request);
     }
-  } while (!shutdown(request, admin_account));
+  } while (rc != shutdown(request));
 
   close(fd);
 
@@ -59,11 +61,4 @@ int main(int argc, char *argv[])
     printf("FIFO '/tmp/secure_srv' has been destroyed\n");
 
   exit(0);
-
-  // while(1){
-  //   for(int i=0; i< 20; i++){
-  //     printf("no: %u\n", srv_accounts[i].account.account_id);
-  //   }
-  //   sleep(5)
-  // }
 }

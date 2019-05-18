@@ -76,19 +76,3 @@ char *generate_salt()
   return salt;
 }
 
-struct bank_account create_account(int id, float balance, char password[MAX_PASSWORD_LEN])
-{
-  fflush(stdout);
-  bank_account_t a;
-  a.account_id = id;
-  a.balance = balance;
-  fflush(stdout);
-  strcpy(a.salt, generate_salt());
-  fflush(stdout);
-  char *aux = a.salt;
-  strcat(aux, password);
-  strcpy(a.hash, generate_hash(aux));
-
-  return a;
-}
-
