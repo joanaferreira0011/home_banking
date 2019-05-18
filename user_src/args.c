@@ -4,6 +4,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include "stdint.h"
+#include "debug.h"
 
 #define ACCID_INDEX 1
 #define PASSWORD_INDEX 2
@@ -30,7 +31,6 @@ tlv_request_t process_arguments(char **argv)
         argv[ACCID_INDEX],
         argv[PASSWORD_INDEX],
         argv[OPDELAY_INDEX]);
-
     op_type_t operation = __ATOUL(argv[OPCODE_INDEX]);
     char **opargs = separate_args(argv[OPARGS_INDEX]);
     switch (operation) {
@@ -54,21 +54,41 @@ tlv_request_t process_arguments(char **argv)
 
 char **separate_args(char *arg_str)
 {
+    __debug_log_str("args::separate_args: entered function.");
+    __debug_print_str("Value of arg_str: ");
+    __debug_log_str(arg_str);
+
     if (!(strlen(arg_str) > 0))
     {
+        __debug_log_str("args::separate_args: strlen was not greater than 0, returning NULL");
         return NULL;
     }
 
-    char **array = malloc(4 * sizeof(char *));
+    char **array = (char **) malloc(4 * sizeof(char *));
     if (array == NULL)
     {
+        __debug_log_str("args::separate_args: could not allocate the string array, returning NULL");
         return NULL;
     }
 
-    array[0] = strtok(arg_str, " ");
+    for (int i = 0; i < 4; ++i) {
+        array[i] = (char *) malloc((MAX_PASSWORD_LEN + 1) * sizeof(char));
+        if (array[i] == NULL) {
+            __debug_log_str("args::separate_args: failed to allocate space for separated strings, freeing previous allocations and returning NULL");
+            for (int j = 0; j < i; ++j) {
+                free(array[j]);
+            }
+            free(array);
+            return NULL;
+        }
+    }
+
+    char *token = strtok(arg_str, " ");
+    strncpy(array[0], token, MAX_PASSWORD_LEN + 1);
     int index = 1;
-    while (((array[index] = strtok(NULL, " ")) != NULL) && (index < 4))
+    while (((token = strtok(NULL, " ")) != NULL) && (index < 3))
     {
+        strncpy(array[index], token, MAX_PASSWORD_LEN + 1);
         ++index;
     }
 
