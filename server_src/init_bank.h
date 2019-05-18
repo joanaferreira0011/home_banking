@@ -22,10 +22,16 @@ typedef struct init_bank
 /**
  * @brief Add account to bank accounts array
  *
- * @return 1 if array is full, 0 if added
+ * @return 1 if there is already an account with same name, 0 if added
  */
 int add_account(bank_account_t account);
 
+/**
+ * @brief Remove account from bank accounts array
+ *
+ * @return 1 if account does not exist
+ */
+int remove_account(uint32_t id);
 /**
  * @brief All the accounts are set too empty,
  *        adds the admin account and bank offices

@@ -55,6 +55,22 @@ int add_account(bank_account_t account)
   }
 }
 
+int remove_account(uint32_t id)
+{
+  pthread_mutex_lock(&srv_accounts[id].mut);
+  if (srv_accounts[id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
+  {
+    pthread_mutex_unlock(&srv_accounts[id].mut);
+    return 1;
+  }
+  else
+  {
+    srv_accounts[id].account.account_id = EMPTY_BANK_ACCOUNT_ID;
+    pthread_mutex_unlock(&srv_accounts[id].mut);
+    return 0;
+  }
+}
+
 int verify_account(uint32_t id, char *password, bank_account_t acc)
 {
   char *hash = malloc(sizeof(char) * HASH_LEN);
