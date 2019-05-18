@@ -102,7 +102,7 @@ ret_code_t check_balance(uint32_t id)
     return RC_OP_NALLOW;
 
   pthread_mutex_lock(&srv_accounts[id].mut);
-  uint32_t balance = srv_accounts[id].account.balance;
+  //uint32_t balance = srv_accounts[id].account.balance;
   pthread_mutex_unlock(&srv_accounts[id].mut);
   return RC_OK;
 }
@@ -142,14 +142,14 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount)
   return RC_OK;
 }
 
-ret_code_t shutdown(tlv_request_t request, bank_account_t admin_account)
+ret_code_t shutdown(tlv_request_t request)
 {
-  if (request.value.header.account_id != ADMIN_ACCOUNT_ID) 
+  if (request.value.header.account_id != ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
-    
+
   if (request.type == OP_SHUTDOWN)
   {
-    if (!(verify_account(request.value.header.account_id, request.value.header.password, admin_account)))
+    if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account)))
       return RC_OTHER;
   }
 
@@ -158,28 +158,55 @@ ret_code_t shutdown(tlv_request_t request, bank_account_t admin_account)
 
 ret_code_t process_request(tlv_request_t request)
 {
-  ret_code_t reply;
+  tlv_reply_t reply;
+  char pid[WIDTH_ID];
+  char fifo_name[USER_FIFO_PATH_LEN];
+  sprintf(pid, "%d", request.value.header.pid);
+  strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
+  strcat(fifo_name, pid);
+  int user_fifo = open(fifo_name, O_WRONLY);
 
   if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account)))
-    reply = RC_LOGIN_FAIL;
+    reply.value.header.ret_code = RC_LOGIN_FAIL;
 
   switch (request.type)
   {
   case OP_CREATE_ACCOUNT:
     if (request.value.header.account_id != ADMIN_ACCOUNT_ID)
-      reply = RC_OP_NALLOW;
+      reply.value.header.ret_code = RC_OP_NALLOW;
     else
-      reply = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password);
+      reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password);
+    reply.length = sizeof(rep_header_t);
+    reply.type = OP_CREATE_ACCOUNT;
+    reply.value.header.account_id = request.value.create.account_id;
     break;
   case OP_BALANCE:
-    reply = check_balance(request.value.create.account_id);
+    reply.value.header.ret_code = check_balance(request.value.create.account_id);
+    reply.length = sizeof(rep_header_t) + sizeof(rep_balance_t);
+    reply.type = OP_BALANCE;
+    reply.value.header.account_id = request.value.header.account_id;
+    reply.value.balance.balance = srv_accounts[request.value.header.account_id].account.balance;
     break;
   case OP_TRANSFER:
-    reply = transfer(request.value.header.account_id, request.value.transfer.account_id, request.value.transfer.amount);
+    reply.value.header.ret_code = transfer(request.value.header.account_id, request.value.transfer.account_id, request.value.transfer.amount);
+    reply.length = sizeof(rep_header_t) + sizeof(rep_transfer_t);
+    reply.type = OP_TRANSFER;
+    reply.value.header.account_id = request.value.header.account_id;
+    reply.value.transfer.balance = request.value.transfer.amount;
+    break;
+  case OP_SHUTDOWN:
+    reply.value.header.ret_code = shutdown(request);
+    reply.length = sizeof(rep_header_t) + sizeof(rep_shutdown_t);
+    reply.type = OP_SHUTDOWN;
+    reply.value.header.account_id = request.value.header.account_id;
+    int active_offices = 0;  //PRECISA DE IMPLEMENTAÇÃO
+    reply.value.shutdown.active_offices = active_offices;
     break;
   default:
     break;
   }
 
-  return reply;
+  write(user_fifo, &reply, sizeof(op_type_t) + sizeof(uint32_t) + reply.length);
+
+  return reply.value.header.ret_code;
 }

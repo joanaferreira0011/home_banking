@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
       read(fd, &request.value, request.length);
       process_request(request);
     }
-  } while (rc != shutdown(request, srv_accounts[ADMIN_ACCOUNT_ID].account));
+  } while (rc != shutdown(request));
 
   close(fd);
 

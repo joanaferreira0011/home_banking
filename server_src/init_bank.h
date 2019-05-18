@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include "account.h"
@@ -38,6 +40,6 @@ int create_bank(init_bank_t bank);
 
 ret_code_t create_account(int id, float balance, char *password);
 
-ret_code_t shutdown(tlv_request_t request, bank_account_t admin_account);
+ret_code_t shutdown(tlv_request_t request);
 
 ret_code_t process_request(tlv_request_t request);
