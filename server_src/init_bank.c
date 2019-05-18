@@ -164,7 +164,7 @@ ret_code_t process_request(tlv_request_t request)
   sprintf(pid, "%d", request.value.header.pid);
   strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
   strcat(fifo_name, pid);
-  int user_fifo = open(fifo_name, O_WRONLY);
+  int fd_user = open(fifo_name, O_WRONLY);
 
   if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account)))
     reply.value.header.ret_code = RC_LOGIN_FAIL;
@@ -206,7 +206,7 @@ ret_code_t process_request(tlv_request_t request)
     break;
   }
 
-  write(user_fifo, &reply, sizeof(op_type_t) + sizeof(uint32_t) + reply.length);
+  write(fd_user, &reply, sizeof(op_type_t) + sizeof(uint32_t) + reply.length);
 
   return reply.value.header.ret_code;
 }

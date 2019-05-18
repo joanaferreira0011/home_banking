@@ -61,11 +61,4 @@ int main(int argc, char *argv[])
     printf("FIFO '/tmp/secure_srv' has been destroyed\n");
 
   exit(0);
-
-  // while(1){
-  //   for(int i=0; i< 20; i++){
-  //     printf("no: %u\n", srv_accounts[i].account.account_id);
-  //   }
-  //   sleep(5)
-  // }
 }
