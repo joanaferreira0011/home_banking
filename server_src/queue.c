@@ -6,7 +6,7 @@ struct Queue *createQueue(unsigned capacity)
     queue->capacity = capacity;
     queue->front = queue->size = 0;
     queue->rear = capacity - 1; // This is important, see the enqueue
-    queue->array = (int *)malloc(queue->capacity * sizeof(int));
+    queue->array = (tlv_request_t *)malloc(queue->capacity * sizeof(tlv_request_t));
     return queue;
 }
 
@@ -20,7 +20,7 @@ bool isEmpty(struct Queue *queue)
     return (queue->size == 0);
 }
 
-void push(struct Queue *queue, int item)
+void push(struct Queue *queue, tlv_request_t item)
 {
     if (isFull(queue))
         return;
@@ -30,26 +30,26 @@ void push(struct Queue *queue, int item)
     printf("%d enqueued to queue\n", item);
 }
 
-int pop(struct Queue *queue)
+tlv_request_t pop(struct Queue *queue)
 {
-    if (isEmpty(queue))
-        return INT_MIN;
-    int item = queue->array[queue->front];
+    // if (isEmpty(queue))
+    //     return NULL;
+    tlv_request_t item = queue->array[queue->front];
     queue->front = (queue->front + 1) % queue->capacity;
     queue->size = queue->size - 1;
     return item;
 }
 
-int front(struct Queue *queue)
+tlv_request_t front(struct Queue *queue)
 {
-    if (isEmpty(queue))
-        return INT_MIN;
+    // if (isEmpty(queue))
+    //     return NULL;
     return queue->array[queue->front];
 }
 
-int back(struct Queue *queue)
+tlv_request_t back(struct Queue *queue)
 {
-    if (isEmpty(queue))
-        return INT_MIN;
+    // if (isEmpty(queue))
+    //     return NULL;
     return queue->array[queue->rear];
 }

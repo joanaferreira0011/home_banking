@@ -32,6 +32,9 @@ int create_bank(init_bank_t bank)
   init_bank_accounts();
 
   create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password);
+  srv_request_queue=createQueue(SRV_REQUEST_QUEUE_SIZE);
+  sem_init(&srv_request_queue_empty, SHARED, 1); /* sem empty = 1 */
+  sem_init(&srv_request_queue_full, SHARED, 0);/* sem full = 0 */
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
   create_bank_offices(bank.n_bank_offices, srv_offices);
 

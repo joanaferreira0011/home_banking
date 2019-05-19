@@ -49,7 +49,10 @@ int main(int argc, char *argv[])
     {
       read(fd, &request.length, sizeof(uint32_t));
       read(fd, &request.value, request.length);
-      process_request(request);
+      sem_wait(&srv_request_queue_empty);
+      push(srv_request_queue, request);
+      // process_request(request);
+      sem_post(&srv_request_queue_full);
     }
   } while (rc != shutdown(request));
 
