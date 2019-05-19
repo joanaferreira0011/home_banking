@@ -1,5 +1,5 @@
 # Project properties
-PROGRAM = server
+PROGRAM = ../server
 
 #source options
 C_FILES := $(wildcard *.c)
