@@ -33,20 +33,21 @@ tlv_request_t process_arguments(char **argv)
         argv[PASSWORD_INDEX],
         argv[OPDELAY_INDEX]);
     op_type_t operation = __ATOUL(argv[OPCODE_INDEX]);
-    char **opargs = separate_args(argv[OPARGS_INDEX]);
-    __debug_log_str_array("Opargs array:", opargs);
-    switch (operation) {
-        case OP_CREATE_ACCOUNT:
-            value.create = new_create_account_message(opargs);
-            break;
-        case OP_TRANSFER:
-            value.transfer = new_transfer_message(opargs);
-            break;
-        default:
-            break;
+    if (operation != OP_SHUTDOWN) {
+        char **opargs = separate_args(argv[OPARGS_INDEX]);
+        __debug_log_str_array("Opargs array:", opargs);
+        switch (operation) {
+            case OP_CREATE_ACCOUNT:
+                value.create = new_create_account_message(opargs);
+                break;
+            case OP_TRANSFER:
+                value.transfer = new_transfer_message(opargs);
+                break;
+            default:
+                break;
+        }
+        string_array_free_elements(opargs);
     }
-    string_array_free_elements(opargs);
-
     tlv_request_t request;
     request.type = operation;
     request.length = sizeof(req_value_t);
