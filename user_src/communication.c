@@ -58,17 +58,13 @@ int open_local_fifo() {
     }
     local_fifo_path = malloc(USER_FIFO_PATH_LEN + 1);
     snprintf(local_fifo_path, USER_FIFO_PATH_LEN, "%s%05d", USER_FIFO_PATH_PREFIX, getpid());
-    if ((local_fifo_fd = mkfifo(local_fifo_path, 0660)) == -1) {
+    if (mkfifo(local_fifo_path, 0660)) {
         __debug_log_str("communication::open_local_fifo: mkfifo failed");
         return 1;
     }
-    if (atexit(close_local_fifo)) {
-        __debug_log_str("communication::open_local_fifo: atexit failed, closing fifo again");
-        close(local_fifo_fd);
-        unlink(local_fifo_path);
-        free(local_fifo_path);
-        return 1;
-    }
+    if ((local_fifo_fd = open(local_fifo_path, O_RDONLY)) == -1)
+        return -1;
+    atexit(close_local_fifo);
     return 0;
 }
 
