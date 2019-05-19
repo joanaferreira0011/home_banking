@@ -7,6 +7,7 @@ C_FILES := $(wildcard *.c)
 #build options
 BUILDDIR = build
 OBJS := $(patsubst %.c, $(BUILDDIR)/%.o, $(C_FILES))
+OBJS += log.o
 
 #compiler options
 CFLAGS =  -pedantic -D_REENTRANT -pthread -Wall
