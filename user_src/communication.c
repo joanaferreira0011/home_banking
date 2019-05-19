@@ -83,7 +83,7 @@ int send_request(tlv_request_t request) {
         __debug_log_str("communication::send_request: serialized is NULL");
         return 1;
     }
-    if (write(server_fifo_fd, serialized, strlen(serialized))) {
+    if (write(server_fifo_fd, &request, sizeof(tlv_request_t))) {
         __debug_log_str("communication::send_request: failed to send serialized");
         free(serialized);
         return 1;

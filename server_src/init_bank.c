@@ -97,7 +97,7 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
 {
   usleep(delay);
   logSyncDelay(server_logfile, pthread_self(), id, delay);
-
+  prinf("array: oi?????\n")
   for (int i = 0; i <= MAX_BANK_ACCOUNTS; i++)
   {
     if (srv_accounts[i].account.account_id == id)
@@ -108,6 +108,7 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
       strlen(password) > MAX_PASSWORD_LEN || strlen(password) < MIN_PASSWORD_LEN)
     return RC_OTHER;
 
+    prinf("array: oi?????\n")
   fflush(stdout);
   bank_account_t a;
   a.account_id = id;
@@ -194,6 +195,7 @@ ret_code_t shutdown(tlv_request_t request)
 
 ret_code_t process_request(tlv_request_t request)
 {
+  printf("oi?\n");
   tlv_reply_t reply;
   char pid[WIDTH_ID];
   char fifo_name[USER_FIFO_PATH_LEN];
@@ -201,20 +203,26 @@ ret_code_t process_request(tlv_request_t request)
   strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
   strcat(fifo_name, pid);
   int fd_user = open(fifo_name, O_WRONLY);
+  printf("oi2?\n");
 
   if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account)))
     reply.value.header.ret_code = RC_LOGIN_FAIL;
-
+printf("oi3?\n");
   switch (request.type)
   {
   case OP_CREATE_ACCOUNT:
+    printf("create\n");
     if (request.value.header.account_id != ADMIN_ACCOUNT_ID)
       reply.value.header.ret_code = RC_OP_NALLOW;
-    else
+    else{
+      printf("fodes aqui?\n");
       reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password, request.value.header.op_delay_ms);
+      printf("else");
+    }
     reply.length = sizeof(rep_header_t);
     reply.type = OP_CREATE_ACCOUNT;
     reply.value.header.account_id = request.value.create.account_id;
+    printf("fim");
     break;
   case OP_BALANCE:
     reply.value.header.ret_code = check_balance(request.value.create.account_id, request.value.header.op_delay_ms);

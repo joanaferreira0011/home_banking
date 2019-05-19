@@ -43,11 +43,10 @@ int main(int argc, char *argv[])
 
   do
   {
-    n = read(fd, &request.type, sizeof(op_type_t));
-    if (n > 0)
+    n = read(fd, &request, sizeof(tlv_request_t));
+    if (n ==sizeof(tlv_request_t))
     {
-      read(fd, &request.length, sizeof(uint32_t));
-      read(fd, &request.value, request.length);
+
       sem_wait(&srv_request_queue_empty);
       push(srv_request_queue, request);
       // process_request(request);

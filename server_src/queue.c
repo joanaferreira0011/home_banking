@@ -34,9 +34,15 @@ tlv_request_t pop(struct Queue *queue)
 {
     // if (isEmpty(queue))
     //     return NULL;
+    printf("oi estou aqui\n");
     tlv_request_t item = queue->array[queue->front];
+    printf("oi estou aqui2\n");
     queue->front = (queue->front + 1) % queue->capacity;
+    printf("oi estou aqui3\n");
     queue->size = queue->size - 1;
+    printf("oi estou aqui4\n");
+    printf("%u - %u\n", item.length, item.value.header.account_id);
+
     return item;
 }
 
