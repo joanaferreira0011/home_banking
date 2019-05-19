@@ -93,25 +93,16 @@ int send_request(tlv_request_t request) {
 }
 
 int read_response(tlv_reply_t *buffer) {
-    uint8_t type;
-    if (read(local_fifo_fd, &type, WIDTH_TYPE) == -1) {
-        if (errno == EINTR) {
+    op_type_t type;
+    uint32_t length;
+    rep_value_t value;
+    if (read(local_fifo_fd, &type, sizeof(op_type_t)) == -1) {
+        if (errno == EINTR)
             return 1;
-        }
     }
-
-    op_type_t op_type = (type - '0');
-    char len[WIDTH_TLV_LEN + 1];
-    len[WIDTH_TLV_LEN] = '\0';
-    read(local_fifo_fd, len, WIDTH_TLV_LEN);
-    uint32_t length = __ATOUL(len);
-
-    char val[length + 1];
-    read(local_fifo_fd, val, length);
-    rep_value_t value = deserialize_rep_value(val, op_type);
-
-    buffer->type = op_type;
+    read(local_fifo_fd, &length, sizeof(uint32_t));
+    read(local_fifo_fd, &value, length);
+    buffer->type = type;
     buffer->length = length;
     buffer->value = value;
-    return 0;
 }
