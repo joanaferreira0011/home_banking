@@ -6,4 +6,6 @@
 
 char *serialize_request(tlv_request_t *request);
 
+rep_value_t deserialize_rep_value(char *str, op_type_t type);
+
 #endif/*__USER_PROTOCOL_H__*/
