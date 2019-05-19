@@ -54,3 +54,7 @@ dkms.conf
 .*
 server_src/server
 user_src/user
+slog.txt
+ulog.txt
+!user_src/log.o
+!server_src/log.o
