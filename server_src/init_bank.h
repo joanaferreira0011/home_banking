@@ -13,6 +13,7 @@
 #include "srv_accounts.h"
 #include "../auxiliary_src/types.h"
 
+
 extern bool end;
 extern int server_logfile;
 

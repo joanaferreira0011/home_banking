@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     }
   } while (!end);
 
-  for (int i = 0; i < argv[1]; i++)
+  for (int i = 0; i < atoi(argv[1]); i++)
   {
     pthread_join(srv_offices[i].thread, NULL);
   }

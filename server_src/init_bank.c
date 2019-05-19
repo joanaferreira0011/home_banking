@@ -1,4 +1,5 @@
 #include "init_bank.h"
+#include "../auxiliary_src/log.c"
 
 bool end = false;
 int server_logfile;
@@ -162,7 +163,7 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
     pthread_mutex_unlock(&srv_accounts[dest].mut);
     return RC_NO_FUNDS;
   }
-  
+
   if (srv_accounts[dest].account.balance + amount > MAX_BALANCE)
     return RC_TOO_HIGH;
 
