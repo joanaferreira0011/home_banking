@@ -25,12 +25,11 @@ void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
 
 
 void close_bank_offices(){
-  printf("nter\n");
+
   for(int i=0; i<n_srv_offices; i++){
-    printf("thread %u\n", i);
+
     pthread_join(srv_offices[i].thread, NULL);
-    perror("error:");
-    printf("thread %u\n", i);
+    
     logBankOfficeClose(server_logfile, srv_offices[i].number, srv_offices[i].thread);
   }
   free(srv_offices);
@@ -225,7 +224,6 @@ ret_code_t process_request(tlv_request_t request)
 
   if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account)))
     reply.value.header.ret_code = RC_LOGIN_FAIL;
-printf("oi3?\n");
   switch (request.type)
   {
   case OP_CREATE_ACCOUNT:
@@ -237,7 +235,6 @@ printf("oi3?\n");
     reply.length = sizeof(rep_header_t);
     reply.type = OP_CREATE_ACCOUNT;
     reply.value.header.account_id = request.value.create.account_id;
-    printf("fim");
     break;
   case OP_BALANCE:
     reply.value.header.ret_code = check_balance(request.value.create.account_id, request.value.header.op_delay_ms);

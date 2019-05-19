@@ -38,10 +38,8 @@ int main(int argc, char *argv[])
       printf("Can't create FIFO\n");
   else
     printf("FIFO '/tmp/secure_srv' sucessfully created\n");
-/////////////////////////////TEST DAS THREADS/////////////////////
-  //   end=true;
-  // close_bank_offices();
-/////////////////////////////////////////////////////
+
+
   if ((fd = open(SERVER_FIFO_PATH, O_RDONLY)) != -1)
     printf("FIFO '/tmp/secure_srv' openned in READONLY mode\n");
 
@@ -51,7 +49,7 @@ int main(int argc, char *argv[])
     n = read(fd, &request, sizeof(tlv_request_t));
     if (n ==sizeof(tlv_request_t))
     {
-      
+
 
       sem_wait(&srv_request_queue_empty);
       push(srv_request_queue, request);
