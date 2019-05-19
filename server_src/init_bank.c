@@ -162,6 +162,9 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
     pthread_mutex_unlock(&srv_accounts[dest].mut);
     return RC_NO_FUNDS;
   }
+  
+  if (srv_accounts[dest].account.balance + amount > MAX_BALANCE)
+    return RC_TOO_HIGH;
 
   srv_accounts[src].account.balance = srv_accounts[src].account.balance - amount;
   srv_accounts[dest].account.balance = srv_accounts[dest].account.balance + amount;
