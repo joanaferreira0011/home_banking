@@ -62,7 +62,7 @@ int open_local_fifo() {
         __debug_log_str("communication::open_local_fifo: mkfifo failed");
         return 1;
     }
-    if ((local_fifo_fd = open(local_fifo_path, O_RDONLY)) == -1)
+    if ((local_fifo_fd = open(local_fifo_path, O_RDONLY | O_NONBLOCK)) == -1)
         return -1;
     atexit(close_local_fifo);
     return 0;
@@ -76,19 +76,11 @@ int send_request(tlv_request_t request) {
         __debug_log_str("communication::send_request: not connected to server");
         return 1;
     }
-    char *serialized = serialize_request(&request);
-    __debug_log_str("Serialized is");
-    __debug_log_str(serialized);
-    if (serialized == NULL) {
-        __debug_log_str("communication::send_request: serialized is NULL");
-        return 1;
-    }
-    if (write(server_fifo_fd, &request, sizeof(tlv_request_t))) {
+
+    if (write(server_fifo_fd, &request, sizeof(tlv_request_t)) < 0) {
         __debug_log_str("communication::send_request: failed to send serialized");
-        free(serialized);
         return 1;
     }
-    free(serialized);
     return 0;
 }
 
