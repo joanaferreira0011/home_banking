@@ -55,6 +55,11 @@ int main(int argc, char *argv[])
     }
   } while (!end);
 
+  for (int i = 0; i < MAX_BANK_OFFICES; i++)
+  {
+    pthread_join(srv_offices[i].thread, NULL);
+  }
+
   close(fd);
 
   if (unlink(SERVER_FIFO_PATH) < 0)
