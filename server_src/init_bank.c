@@ -1,5 +1,8 @@
 #include "init_bank.h"
 
+bool end = false;
+int server_logfile;
+
 //Creates threads for the bank offices
 void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
 {
@@ -31,10 +34,10 @@ int create_bank(init_bank_t bank)
 {
   init_bank_accounts();
 
-  create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password);
-  srv_request_queue=createQueue(SRV_REQUEST_QUEUE_SIZE);
+  create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password, 0);
+  srv_request_queue = createQueue(SRV_REQUEST_QUEUE_SIZE);
   sem_init(&srv_request_queue_empty, SHARED, 1); /* sem empty = 1 */
-  sem_init(&srv_request_queue_full, SHARED, 0);/* sem full = 0 */
+  sem_init(&srv_request_queue_full, SHARED, 0);  /* sem full = 0 */
   srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
   create_bank_offices(bank.n_bank_offices, srv_offices);
 
@@ -44,6 +47,7 @@ int create_bank(init_bank_t bank)
 int add_account(bank_account_t account)
 {
   pthread_mutex_lock(&srv_accounts[account.account_id].mut);
+
   if (srv_accounts[account.account_id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
   {
     srv_accounts[account.account_id].account = account;
@@ -88,8 +92,11 @@ int verify_account(uint32_t id, char *password, bank_account_t acc)
   return -1;
 }
 
-ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN])
+ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN], uint32_t delay)
 {
+  usleep(delay);
+  logSyncDelay(server_logfile, pthread_self(), id, delay);
+
   for (int i = 0; i <= MAX_BANK_ACCOUNTS; i++)
   {
     if (srv_accounts[i].account.account_id == id)
@@ -115,22 +122,24 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
   return RC_OK;
 }
 
-ret_code_t check_balance(uint32_t id)
+ret_code_t check_balance(uint32_t id, uint32_t delay)
 {
   if (id == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
   pthread_mutex_lock(&srv_accounts[id].mut);
+  usleep(delay);
   //uint32_t balance = srv_accounts[id].account.balance;
   pthread_mutex_unlock(&srv_accounts[id].mut);
   return RC_OK;
 }
 
-ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount)
+ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t delay)
 {
   if (src == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
+  usleep(delay);
   bool check_dest = false;
   for (int i = 0; i <= MAX_BANK_ACCOUNTS; i++)
   {
@@ -172,6 +181,10 @@ ret_code_t shutdown(tlv_request_t request)
       return RC_OTHER;
   }
 
+  usleep(request.value.header.op_delay_ms);
+  end = true;
+  chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
+
   return RC_OK;
 }
 
@@ -194,20 +207,20 @@ ret_code_t process_request(tlv_request_t request)
     if (request.value.header.account_id != ADMIN_ACCOUNT_ID)
       reply.value.header.ret_code = RC_OP_NALLOW;
     else
-      reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password);
+      reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password, request.value.header.op_delay_ms);
     reply.length = sizeof(rep_header_t);
     reply.type = OP_CREATE_ACCOUNT;
     reply.value.header.account_id = request.value.create.account_id;
     break;
   case OP_BALANCE:
-    reply.value.header.ret_code = check_balance(request.value.create.account_id);
+    reply.value.header.ret_code = check_balance(request.value.create.account_id, request.value.header.op_delay_ms);
     reply.length = sizeof(rep_header_t) + sizeof(rep_balance_t);
     reply.type = OP_BALANCE;
     reply.value.header.account_id = request.value.header.account_id;
     reply.value.balance.balance = srv_accounts[request.value.header.account_id].account.balance;
     break;
   case OP_TRANSFER:
-    reply.value.header.ret_code = transfer(request.value.header.account_id, request.value.transfer.account_id, request.value.transfer.amount);
+    reply.value.header.ret_code = transfer(request.value.header.account_id, request.value.transfer.account_id, request.value.transfer.amount, request.value.header.op_delay_ms);
     reply.length = sizeof(rep_header_t) + sizeof(rep_transfer_t);
     reply.type = OP_TRANSFER;
     reply.value.header.account_id = request.value.header.account_id;
@@ -218,7 +231,7 @@ ret_code_t process_request(tlv_request_t request)
     reply.length = sizeof(rep_header_t) + sizeof(rep_shutdown_t);
     reply.type = OP_SHUTDOWN;
     reply.value.header.account_id = request.value.header.account_id;
-    int active_offices = 0;  //PRECISA DE IMPLEMENTAÇÃO
+    int active_offices = 0; //PRECISA DE IMPLEMENTAÇÃO
     reply.value.shutdown.active_offices = active_offices;
     break;
   default:

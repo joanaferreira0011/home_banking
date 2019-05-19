@@ -26,10 +26,9 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
 
   create_bank(bank);
-
+  server_logfile = open(SERVER_LOGFILE, O_CREAT | O_WRONLY | O_APPEND, 0666);
   int fd, n;
   tlv_request_t request;
-  ret_code_t rc = RC_OK;
 
   if (mkfifo(SERVER_FIFO_PATH, 0660) < 0)
     if (errno == EEXIST)
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
       // process_request(request);
       sem_post(&srv_request_queue_full);
     }
-  } while (rc != shutdown(request));
+  } while (!end);
 
   close(fd);
 

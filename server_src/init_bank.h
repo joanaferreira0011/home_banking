@@ -7,10 +7,14 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <sys/stat.h>
 #include "account.h"
 #include "bank_office.h"
 #include "srv_accounts.h"
 #include "../auxiliary_src/types.h"
+
+extern bool end;
+extern int server_logfile;
 
 extern pthread_mutex_t mut_srv_accounts;
 /**
@@ -44,7 +48,7 @@ int remove_account(uint32_t id);
  */
 int create_bank(init_bank_t bank);
 
-ret_code_t create_account(int id, float balance, char *password);
+ret_code_t create_account(int id, float balance, char *password, uint32_t delay);
 
 ret_code_t shutdown(tlv_request_t request);
 
