@@ -112,10 +112,10 @@ int read_response(tlv_reply_t *buffer) {
 
     char val[length + 1];
     read(local_fifo_fd, val, length);
-    rep_value_t deserialize_rep_value(val, op_type);
+    rep_value_t value = deserialize_rep_value(val, op_type);
 
     buffer->type = op_type;
     buffer->length = length;
-    buffer->value = val;
+    buffer->value = value;
     return 0;
 }
