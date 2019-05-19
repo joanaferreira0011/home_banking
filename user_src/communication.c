@@ -76,7 +76,7 @@ int send_request(tlv_request_t request) {
         __debug_log_str("communication::send_request: not connected to server");
         return 1;
     }
-    char *serialized = serialize_request(request);
+    char *serialized = serialize_request(&request);
     __debug_log_str("Serialized is");
     __debug_log_str(serialized);
     if (serialized == NULL) {

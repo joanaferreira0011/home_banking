@@ -8,7 +8,16 @@
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
 
-char *stradd(char *str1, char *str2);
+char *stradd(char *str1, char *str2) {
+    size_t size1 = strlen(str1);
+    size_t size2 = strlen(str2);
+    size_t size = size1 + size2 + 1;
+    char *result = malloc(size);
+    memcpy(result, str1, size1);
+    memcpy(result + size1, str2, size2);
+    result[size - 1] = '\0';
+    return result;
+}
 
 char *serialize_type(op_type_t type);
 char *serialize_length(uint32_t length);
@@ -17,6 +26,7 @@ char *serialize_request(tlv_request_t *request) {
     char *type = serialize_type(request->type);
     char *value = serialize_value(request->value, request->type);
     uint32_t length_num = strlen(value);
+    request->length = length_num;
     char *length = serialize_length(length_num);
     char *type_and_length = stradd(type, length);
     free(type);
@@ -48,12 +58,12 @@ char *serialize_value(req_value_t value, op_type_t op_type) {
     char *result = NULL;
     char *header = serialize_header(value.header);
     switch (op_type) {
-        case OP_CREATE_ACCOUNT:
+        case OP_CREATE_ACCOUNT: ;
             char *create = serialize_create(value.create);
             result = stradd(header, create);
             free(create);
             break;
-        case OP_TRANSFER:
+        case OP_TRANSFER: ;
             char *transfer = serialize_transfer(value.transfer);
             result  = stradd(header, transfer);
             free(transfer);
@@ -66,7 +76,7 @@ char *serialize_value(req_value_t value, op_type_t op_type) {
 }
 
 char *serialize_pid(pid_t pid);
-char *serialize_acc_id(uint_32_t acc_id);
+char *serialize_acc_id(uint32_t acc_id);
 char *copy_and_trim_pw(char *password);
 char *serialize_delay(uint32_t delay);
 char *serialize_header(req_header_t header) {
@@ -79,7 +89,7 @@ char *serialize_header(req_header_t header) {
     char *pid_acc_id_pw = stradd(pid_acc_id, pw);
     free(pid_acc_id);
     free(pw);
-    char *delay = serialize_delay(header.delay);
+    char *delay = serialize_delay(header.op_delay_ms);
     char *result = stradd(pid_acc_id_pw, delay);
     free(pid_acc_id_pw);
     free(delay);
@@ -92,7 +102,7 @@ char *serialize_pid(pid_t pid) {
     snprintf(result, size, "%0" STRINGIFY(WIDTH_ID) "d",  pid);
     return result;
 }
-char *serialize_acc_id(uint_32_t acc_id) {
+char *serialize_acc_id(uint32_t acc_id) {
     size_t size = WIDTH_ACCOUNT + 1;
     char *result = malloc(size);
     snprintf(result, size, "%0" STRINGIFY(WIDTH_ACCOUNT) "d", acc_id);
@@ -125,8 +135,15 @@ char *serialize_create(req_create_account_t create) {
 
 char *serialize_transfer(req_transfer_t transfer) {
     char *acc_id = serialize_acc_id(transfer.account_id);
-    char *amount = serialize_balance(amount);
-    char *result = stradd(acc_id, amount);
-    free(acc_id); free(amount);
+    char *ammount = serialize_balance(transfer.amount);
+    char *result = stradd(acc_id, ammount);
+    free(acc_id); free(ammount);
+    return result;
+}
+
+char *serialize_balance(uint32_t ammount) {
+    size_t size = WIDTH_BALANCE + 1;
+    char *result = malloc(size);
+    snprintf(result, size, "%0" STRINGIFY(WIDTH_BALANCE) "d", ammount);
     return result;
 }

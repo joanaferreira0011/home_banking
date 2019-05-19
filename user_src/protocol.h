@@ -4,6 +4,6 @@
 
 #include "../auxiliary_src/types.h"
 
-char *serialize_request(tlv_request_t request);
+char *serialize_request(tlv_request_t *request);
 
 #endif/*__USER_PROTOCOL_H__*/
