@@ -1,5 +1,5 @@
 #include "init_bank.h"
-#include "../auxiliary_src/log.c"
+#include "../auxiliary_src/sope.h"
 
 bool end = false;
 int server_logfile;
