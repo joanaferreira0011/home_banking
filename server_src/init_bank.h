@@ -54,3 +54,5 @@ ret_code_t create_account(int id, float balance, char *password, uint32_t delay)
 ret_code_t shutdown(tlv_request_t request);
 
 ret_code_t process_request(tlv_request_t request);
+
+void close_bank_offices();

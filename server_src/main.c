@@ -25,8 +25,9 @@ int main(int argc, char *argv[])
   if (get_bank_init_details(argv, &bank) == -1)
     exit(EXIT_FAILURE);
 
-  create_bank(bank);
   server_logfile = open(SERVER_LOGFILE, O_CREAT | O_WRONLY | O_APPEND, 0666);
+  create_bank(bank);
+
   int fd, n;
   tlv_request_t request;
 
@@ -37,22 +38,33 @@ int main(int argc, char *argv[])
       printf("Can't create FIFO\n");
   else
     printf("FIFO '/tmp/secure_srv' sucessfully created\n");
-
+/////////////////////////////TEST DAS THREADS/////////////////////
+    end=true;
+  close_bank_offices();
+/////////////////////////////////////////////////////
   if ((fd = open(SERVER_FIFO_PATH, O_RDONLY)) != -1)
     printf("FIFO '/tmp/secure_srv' openned in READONLY mode\n");
 
+
   do
   {
+    printf("enter\n");
+    fflush(stdout);
     n = read(fd, &request.type, sizeof(op_type_t));
     if (n > 0)
     {
+      printf("found\n");
+      fflush(stdout);
       read(fd, &request.length, sizeof(uint32_t));
       read(fd, &request.value, request.length);
+      printf("value: %s\n", request.value);
+      fflush(stdout);
       sem_wait(&srv_request_queue_empty);
       push(srv_request_queue, request);
       // process_request(request);
       sem_post(&srv_request_queue_full);
     }
+    sleep(5);
   } while (!end);
 
   for (int i = 0; i < atoi(argv[1]); i++)
@@ -66,6 +78,7 @@ int main(int argc, char *argv[])
     printf("Error when destroying FIFO '/tmp/secure_srv'\n");
   else
     printf("FIFO '/tmp/secure_srv' has been destroyed\n");
+
 
   exit(0);
 }
