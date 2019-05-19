@@ -6,6 +6,10 @@
 #include "sys/stat.h"
 #include "errno.h"
 #include "debug.h"
+#include "../auxiliary_src/constants.h"
+
+#define WIDTH_TYPE 1
+#define __ATOUL(STR) strtoul(STR, NULL, 10)
 
 static int server_fifo_fd = -1;
 static int local_fifo_fd = -1;
@@ -93,33 +97,25 @@ int send_request(tlv_request_t request) {
 }
 
 int read_response(tlv_reply_t *buffer) {
-    __debug_log_str("communication::read_response: entered function");
-    if (local_fifo_fd == -1) {
-        __debug_log_str("communication::read_response: local fifo is closed");
-        return 1;
-    }
-    if (buffer == NULL) {
-        __debug_log_str("communication::read_response: buffer is a NULL pointer");
-        return 1;
-    }
-    op_type_t reply_type;
-    uint32_t reply_length;
-    rep_value_t reply_value;
-    __debug_log_str("communication::read_response: trying to read reply_type, will block while nothing is received");
-    if (read(local_fifo_fd, &reply_type, sizeof(op_type_t)) == -1) {
-        __debug_log_str("communication::read_response: read failed, checking for signal interruption");
+    uint8_t type;
+    if (read(local_fifo_fd, &type, WIDTH_TYPE) == -1) {
         if (errno == EINTR) {
-            __debug_log_str("communication::read_response: EINTR detected, server probably timed out");
             return 1;
         }
     }
-    __debug_log_str("communication::read_response: reading message length");
-    read(local_fifo_fd, &reply_length, sizeof(uint32_t));
-    __debug_log_str("communication::read_response: reading message value");
-    read(local_fifo_fd, &reply_value, reply_length);
-    __debug_log_str("communication::read_response: writing fields to buffer");
-    buffer->type = reply_type;
-    buffer->length = reply_length;
-    buffer->value = reply_value;
+
+    op_type_t op_type = (type - '0');
+    char len[WIDTH_TLV_LEN + 1];
+    len[WIDTH_TLV_LEN] = '\0';
+    read(local_fifo_fd, len, WIDTH_TLV_LEN);
+    uint32_t length = __ATOUL(len);
+
+    char val[length + 1];
+    read(local_fifo_fd, val, length);
+    rep_value_t deserialize_rep_value(val, op_type);
+
+    buffer->type = op_type;
+    buffer->length = length;
+    buffer->value = val;
     return 0;
 }
