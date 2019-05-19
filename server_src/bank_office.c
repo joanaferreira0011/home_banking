@@ -16,7 +16,7 @@ void *execute_bank_office(void *threadnum)
 
        request= pop(srv_request_queue);
        process_request(request);
-       
+
        sem_post(&srv_request_queue_empty);
      }
     // pthread_exit(NULL);

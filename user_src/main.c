@@ -1,12 +1,14 @@
 #include "communication.h"
 #include "../auxiliary_src/types.h"
 #include "../auxiliary_src/constants.h"
+#include "../auxiliary_src/sope.h"
 #include "stdlib.h"
 #include "stdio.h"
 #include "debug.h"
 #include "unistd.h"
 #include "args.h"
 #include "signal.h"
+#include "unistd.h"
 
 void alarm_signal_handler(int signal) {
     __debug_log_str("main::alarm_signal_handler: handling SIGALRM");
@@ -33,6 +35,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    int log_fd;
+    open(USER_LOGFILE, O_WRONLY | O_CREAT, 0660);
+
     __debug_log_str("main: starting connection to server fifo");
     if (open_connection_to_srv()) {
         fprintf(stderr, "main: Could not connect to %s\n", SERVER_FIFO_PATH);
@@ -53,6 +58,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "main: failed to send request\n");
         exit(EXIT_FAILURE);
     }
+    logRequest(log_fd, getpid(), &request);
 
     __debug_log_str("main: closing connection to server fifo");
     if (close_connection_to_srv()) {
@@ -71,6 +77,7 @@ int main(int argc, char *argv[])
         __debug_log_str("main: timed out");
         exit(EXIT_FAILURE);
     }
+    logReply(log_fd, getpid(), &reply);
 
     exit(EXIT_SUCCESS);
 }

@@ -19,8 +19,23 @@ void create_bank_offices(uint32_t n_bank_offices, bank_office_t *offices)
     pthread_create(&(offices[t].thread), NULL,
                    execute_bank_office,
                    &(offices[t].number));
+    logBankOfficeOpen(server_logfile, offices[t].number, offices[t].thread);
   }
 }
+
+
+void close_bank_offices(){
+  printf("nter\n");
+  for(int i=0; i<n_srv_offices; i++){
+    printf("thread %u\n", i);
+    pthread_join(srv_offices[i].thread, NULL);
+    perror("error:");
+    printf("thread %u\n", i);
+    logBankOfficeClose(server_logfile, srv_offices[i].number, srv_offices[i].thread);
+  }
+  free(srv_offices);
+}
+
 
 void init_bank_accounts()
 {
@@ -33,13 +48,15 @@ void init_bank_accounts()
 
 int create_bank(init_bank_t bank)
 {
+
   init_bank_accounts();
 
   create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password, 0);
   srv_request_queue = createQueue(SRV_REQUEST_QUEUE_SIZE);
   sem_init(&srv_request_queue_empty, SHARED, 1); /* sem empty = 1 */
   sem_init(&srv_request_queue_full, SHARED, 0);  /* sem full = 0 */
-  srv_offices = malloc(bank.n_bank_offices * sizeof(bank_office_t));
+  srv_offices = (bank_office_t*) malloc(bank.n_bank_offices * sizeof(bank_office_t));
+  n_srv_offices= bank.n_bank_offices;
   create_bank_offices(bank.n_bank_offices, srv_offices);
 
   return 0;
@@ -121,6 +138,7 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
   strcpy(a.hash, generate_hash(aux));
 
   add_account(a);
+  logAccountCreation(server_logfile, id, &srv_accounts[id].account);
   return RC_OK;
 }
 
@@ -174,6 +192,9 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
   pthread_mutex_unlock(&srv_accounts[dest].mut);
   return RC_OK;
 }
+
+
+
 
 ret_code_t shutdown(tlv_request_t request)
 {
