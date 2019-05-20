@@ -64,32 +64,35 @@ int create_bank(init_bank_t bank)
 int add_account(bank_account_t account)
 {
   pthread_mutex_lock(&srv_accounts[account.account_id].mut);
-  logSyncMech(server_logfile, getpid(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, account.account_id);
+  logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, account.account_id);
   if (srv_accounts[account.account_id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
   {
     srv_accounts[account.account_id].account = account;
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
-    logSyncMech(server_logfile, getpid(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
     return 0;
   }
   else
   {
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
-    logSyncMech(server_logfile, getpid(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
     return 1;
   }
 }
 
 int remove_account(uint32_t id)
 {
+  logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, id);
   pthread_mutex_lock(&srv_accounts[id].mut);
   if (srv_accounts[id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
   {
+    pthread_mutex_unlock(&srv_accounts[id].mut);
     pthread_mutex_unlock(&srv_accounts[id].mut);
     return 1;
   }
   else
   {
+    pthread_mutex_unlock(&srv_accounts[id].mut);
     srv_accounts[id].account.account_id = EMPTY_BANK_ACCOUNT_ID;
     pthread_mutex_unlock(&srv_accounts[id].mut);
     return 0;
@@ -113,8 +116,8 @@ int verify_account(uint32_t id, char *password, bank_account_t acc)
 
 ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN], uint32_t delay)
 {
-  // usleep(delay);
-  // logSyncDelay(server_logfile, pthread_self(), id, delay);
+  usleep(delay);
+  logSyncDelay(server_logfile, pthread_self(), id, delay);
 
  printf("\n\n\n\n");
     if (srv_accounts[id].account.account_id != EMPTY_BANK_ACCOUNT_ID)
