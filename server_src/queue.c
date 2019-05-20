@@ -27,7 +27,6 @@ void push(struct Queue *queue, tlv_request_t item)
     queue->rear = (queue->rear + 1) % queue->capacity;
     queue->array[queue->rear] = item;
     queue->size = queue->size + 1;
-    printf("%d enqueued to queue\n", item);
 }
 
 tlv_request_t pop(struct Queue *queue)
@@ -41,7 +40,6 @@ tlv_request_t pop(struct Queue *queue)
 
     queue->size = queue->size - 1;
 
-    printf("%u - %u\n", item.length, item.value.header.account_id);
 
     return item;
 }

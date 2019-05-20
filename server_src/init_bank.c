@@ -29,7 +29,7 @@ void close_bank_offices(){
   for(int i=0; i<n_srv_offices; i++){
 
     pthread_join(srv_offices[i].thread, NULL);
-    
+
     logBankOfficeClose(server_logfile, srv_offices[i].number, srv_offices[i].thread);
   }
   free(srv_offices);
@@ -64,16 +64,18 @@ int create_bank(init_bank_t bank)
 int add_account(bank_account_t account)
 {
   pthread_mutex_lock(&srv_accounts[account.account_id].mut);
-
+  logSyncMech(server_logfile, getpid(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, account.account_id);
   if (srv_accounts[account.account_id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
   {
     srv_accounts[account.account_id].account = account;
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
+    logSyncMech(server_logfile, getpid(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
     return 0;
   }
   else
   {
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
+    logSyncMech(server_logfile, getpid(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
     return 1;
   }
 }
@@ -111,10 +113,10 @@ int verify_account(uint32_t id, char *password, bank_account_t acc)
 
 ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN], uint32_t delay)
 {
-  usleep(delay);
-  logSyncDelay(server_logfile, pthread_self(), id, delay);
+  // usleep(delay);
+  // logSyncDelay(server_logfile, pthread_self(), id, delay);
 
-
+ printf("\n\n\n\n");
     if (srv_accounts[id].account.account_id != EMPTY_BANK_ACCOUNT_ID)
       return RC_ID_IN_USE;
 
@@ -147,7 +149,7 @@ ret_code_t check_balance(uint32_t id, uint32_t delay)
 
   pthread_mutex_lock(&srv_accounts[id].mut);
   usleep(delay);
-  //uint32_t balance = srv_accounts[id].account.balance;
+  uint32_t balance = srv_accounts[id].account.balance;
   pthread_mutex_unlock(&srv_accounts[id].mut);
   return RC_OK;
 }

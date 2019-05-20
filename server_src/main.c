@@ -49,11 +49,11 @@ int main(int argc, char *argv[])
     n = read(fd, &request, sizeof(tlv_request_t));
     if (n ==sizeof(tlv_request_t))
     {
-
+      logRequest(server_logfile, 0, &request);
 
       sem_wait(&srv_request_queue_empty);
       push(srv_request_queue, request);
-      // process_request(request);
+      printf("is in q\n");
       sem_post(&srv_request_queue_full);
     }
     sleep(5);
