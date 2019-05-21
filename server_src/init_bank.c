@@ -48,6 +48,7 @@ void init_bank_accounts(){
 int create_bank(init_bank_t bank)
 {
   int sem_value;
+  srv_accounts= (srv_account_t*) malloc(MAX_BANK_ACCOUNTS * sizeof(srv_account_t));
   init_bank_accounts();
   srv_request_queue = createQueue(SRV_REQUEST_QUEUE_SIZE);
   sem_init(&srv_request_queue_empty, SHARED, 1); /* sem empty = 1 */
@@ -108,6 +109,7 @@ int remove_account(uint32_t id)
 
 int verify_account(uint32_t id, char *password, bank_account_t acc)
 {
+
   char *hash = malloc(sizeof(char) * HASH_LEN);
 
   char *aux = acc.salt;
@@ -156,16 +158,27 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
 
 ret_code_t check_balance(uint32_t id, uint32_t delay, uint32_t *balance_buffer)
 {
+
   if (id == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
 
-  pthread_mutex_lock(&srv_accounts[id].mut);
+
+      //printf("chek2 i:%u, mut: %u\n", id, pthread_mutex_trylock(&srv_accounts[id].mut));
+      //  fflush(stdout);
+  pthread_mutex_lock(&(srv_accounts[id].mut));
+
+
   logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, id);
+
+
   if(srv_accounts[id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
     return RC_ID_NOT_FOUND;
   usleep(delay);
+  logDelay(server_logfile, pthread_self(), delay);
   (*balance_buffer) = srv_accounts[id].account.balance;
+
+
   pthread_mutex_unlock(&srv_accounts[id].mut);
   logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, id);
   return RC_OK;
@@ -176,7 +189,7 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
   if (src == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
-  usleep(delay);
+
   bool check_dest = false;
   for (int i = 0; i <= MAX_BANK_ACCOUNTS; i++)
   {
@@ -192,16 +205,24 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
 
   if (src < dest) {
     pthread_mutex_lock(&srv_accounts[src].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, src);
     pthread_mutex_lock(&srv_accounts[dest].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, dest);
   } else {
     pthread_mutex_lock(&srv_accounts[dest].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, dest);
     pthread_mutex_lock(&srv_accounts[src].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, src);
   }
+  usleep(delay);
+  logDelay(server_logfile, pthread_self(), delay);
 
   if (srv_accounts[src].account.balance < amount)
   {
     pthread_mutex_unlock(&srv_accounts[src].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, src);
     pthread_mutex_unlock(&srv_accounts[dest].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, dest);
     return RC_NO_FUNDS;
   }
 
@@ -214,10 +235,14 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
 
   if (src < dest) {
     pthread_mutex_unlock(&srv_accounts[src].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, src);
     pthread_mutex_unlock(&srv_accounts[dest].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, dest);
   } else {
     pthread_mutex_unlock(&srv_accounts[dest].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, dest);
     pthread_mutex_unlock(&srv_accounts[src].mut);
+    logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, src);
   }
 
   return RC_OK;
@@ -254,17 +279,17 @@ ret_code_t process_request(tlv_request_t request)
 
   if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account))){
     reply.value.header.ret_code = RC_LOGIN_FAIL;
-    printf("wrong login\n");
+
   }
   switch (request.type)
   {
   case OP_CREATE_ACCOUNT:
     if (request.value.header.account_id != ADMIN_ACCOUNT_ID){
-      printf("not admin\n");
+
       reply.value.header.ret_code = RC_OP_NALLOW;
     }
     else{
-      printf("oi\n");
+
       reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password, request.value.header.op_delay_ms);
     }
     reply.length = sizeof(rep_header_t);

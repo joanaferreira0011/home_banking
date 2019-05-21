@@ -18,14 +18,12 @@ void *execute_bank_office(void *threadnum)
        sem_getvalue(&srv_request_queue_empty, &sem_value);
        logSyncMechSem(server_logfile,  pthread_self(), SYNC_OP_SEM_WAIT, SYNC_ROLE_CONSUMER, request.value.header.pid, sem_value);
        process_request(request);
-       fflush(stdout);
 
        sem_post(&srv_request_queue_empty);
-        fflush(stdout);
        sem_getvalue(&srv_request_queue_full, &sem_value);
-        fflush(stdout);
+
        logSyncMechSem(server_logfile,  pthread_self(), SYNC_OP_SEM_POST, SYNC_ROLE_CONSUMER, request.value.header.pid, sem_value);
-       fflush(stdout);
+
      }
     pthread_exit(NULL);
 
