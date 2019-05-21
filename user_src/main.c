@@ -14,11 +14,14 @@ void alarm_signal_handler(int signal) {
     __debug_log_str("main::alarm_signal_handler: handling SIGALRM");
 }
 
+
 int set_up_alarm() {
     __debug_log_str("main::set_up_alarm: entered function");
     signal(SIGALRM, alarm_signal_handler);
+    siginterrupt(SIGALRM, 1);
     return 0;
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -43,8 +46,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    __debug_log_str("main: opening local fifo");
-    if (open_local_fifo()) {
+    __debug_log_str("main: creating local fifo");
+    if (create_local_fifo()) {
         fprintf(stderr, "main: could not create %s%05d\n", USER_FIFO_PATH_PREFIX, getpid());
         exit(EXIT_FAILURE);
     }
@@ -71,10 +74,16 @@ int main(int argc, char *argv[])
     __debug_log_str("main: starting alarm");
     alarm(FIFO_TIMEOUT_SECS);
 
-    tlv_reply_t reply;
-    if (read_response(&reply)) {
-        __debug_log_str("main: timed out");
+    __debug_log_str("main: opening fifo");
+    if (open_local_fifo()) {
+        __debug_log_str("main: fifo opening failed, perhaps timed out");
         exit(EXIT_FAILURE);
+    }
+
+    tlv_reply_t reply;
+    __debug_log_str("main::reading response");
+    if (read_response(&reply)) {
+        __debug_log_str("main: read failed");
     }
     logReply(log_fd, getpid(), &reply);
 

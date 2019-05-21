@@ -53,7 +53,7 @@ req_header_t new_header(char *account_id, char *password, char *op_delay)
     ;
     strncpy(header.password, password, MAX_PASSWORD_LEN);
     header.password[MAX_PASSWORD_LEN] = '\0';
-    header.op_delay_ms = __ATOUL(account_id);
+    header.op_delay_ms = __ATOUL(op_delay);
     __debug_log_str("args::new_header: leaving function");
     return header;
 }

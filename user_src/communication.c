@@ -49,20 +49,34 @@ void close_local_fifo(void) {
     }
 }
 
+int create_local_fifo() {
+    __debug_log_str("communication::create_local_fifo: entered function");
+    local_fifo_path = malloc(USER_FIFO_PATH_LEN + 1);
+    snprintf(local_fifo_path, USER_FIFO_PATH_LEN, "%s%05d", USER_FIFO_PATH_PREFIX, getpid());
+    if (mkfifo(local_fifo_path, 0660)) {
+        __debug_log_str("communication::create_local_fifo: mkfifo failed");
+        return 1;
+    }
+    return 0;
+}
+
 int open_local_fifo() {
     __debug_log_str("communication::open_local_fifo: entered function");
     if (local_fifo_fd != -1) {
         __debug_log_str("communication::open_local_fifo: fifo is already open");
         return 1;
     }
-    local_fifo_path = malloc(USER_FIFO_PATH_LEN + 1);
-    snprintf(local_fifo_path, USER_FIFO_PATH_LEN, "%s%05d", USER_FIFO_PATH_PREFIX, getpid());
-    if (mkfifo(local_fifo_path, 0660)) {
-        __debug_log_str("communication::open_local_fifo: mkfifo failed");
+    if (local_fifo_path == NULL) {
+        __debug_log_str("communication::open_local_fifo: path to fifo is undefined, have you created it?");
         return 1;
     }
-    if ((local_fifo_fd = open(local_fifo_path, O_RDONLY | O_NONBLOCK)) == -1)
-        return -1;
+    if ((local_fifo_fd = open(local_fifo_path, O_RDONLY)) == -1) {
+        __debug_log_str("detected signal. probably timed out");
+        if (errno == EINTR) {
+            __debug_log_str("detected signal. probably timed out");
+        }
+        return 1;
+    }
     atexit(close_local_fifo);
     return 0;
 }
@@ -87,12 +101,18 @@ int read_response(tlv_reply_t *buffer) {
     op_type_t type;
     uint32_t length;
     rep_value_t value;
-    if (read(local_fifo_fd, &type, sizeof(op_type_t)) == -1) {
-        if (errno == EINTR)
-            return 1;
+    __debug_log_str("Trying first read");
+    if (read(local_fifo_fd, &type, sizeof(op_type_t)) <= 0) {
+        __debug_log_str("Failed first read");
     }
-    read(local_fifo_fd, &length, sizeof(uint32_t));
-    read(local_fifo_fd, &value, length);
+    __debug_log_str("Trying second read");
+    if (read(local_fifo_fd, &length, sizeof(uint32_t)) <= 0) {
+        __debug_log_str("Failed second read");
+    }
+    __debug_log_str("Trying third read");
+    if (read(local_fifo_fd, &value, length) <= 0) {
+        __debug_log_str("Failed third read");
+    }
     buffer->type = type;
     buffer->length = length;
     buffer->value = value;

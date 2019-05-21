@@ -16,4 +16,6 @@ int send_request(tlv_request_t request);
 
 int read_response(tlv_reply_t *buffer);
 
+int create_local_fifo();
+
 int close_connection_to_srv();
