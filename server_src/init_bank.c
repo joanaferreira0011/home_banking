@@ -36,24 +36,28 @@ void close_bank_offices(){
 }
 
 
-void init_bank_accounts()
-{
+void init_bank_accounts(){
   for (int i = 0; i < MAX_BANK_ACCOUNTS; i++)
   {
     srv_accounts[i].account.account_id = EMPTY_BANK_ACCOUNT_ID;
     pthread_mutex_init(&(srv_accounts[i].mut), NULL);
+
   }
 }
 
 int create_bank(init_bank_t bank)
 {
-
+  int sem_value;
   init_bank_accounts();
-
-  create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password, 0);
   srv_request_queue = createQueue(SRV_REQUEST_QUEUE_SIZE);
   sem_init(&srv_request_queue_empty, SHARED, 1); /* sem empty = 1 */
+  sem_getvalue(&srv_request_queue_empty, &sem_value);
+  logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_INIT, SYNC_ROLE_PRODUCER, 0, sem_value);
   sem_init(&srv_request_queue_full, SHARED, 0);  /* sem full = 0 */
+  sem_getvalue(&srv_request_queue_full, &sem_value);
+  logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_INIT, SYNC_ROLE_PRODUCER, 0, sem_value);
+  create_account(ADMIN_ACCOUNT_ID, 0, bank.admin_password, 0);
+
   srv_offices = (bank_office_t*) malloc(bank.n_bank_offices * sizeof(bank_office_t));
   n_srv_offices= bank.n_bank_offices;
   create_bank_offices(bank.n_bank_offices, srv_offices);
@@ -65,9 +69,11 @@ int add_account(bank_account_t account)
 {
   pthread_mutex_lock(&srv_accounts[account.account_id].mut);
   logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, account.account_id);
+
   if (srv_accounts[account.account_id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
   {
     srv_accounts[account.account_id].account = account;
+    logAccountCreation(server_logfile, account.account_id, &account);
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
     logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
     return 0;
@@ -119,7 +125,7 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
   usleep(delay);
   logSyncDelay(server_logfile, pthread_self(), id, delay);
 
- printf("\n\n\n\n");
+
     if (srv_accounts[id].account.account_id != EMPTY_BANK_ACCOUNT_ID)
       return RC_ID_IN_USE;
 
@@ -138,9 +144,11 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
   char *aux = a.salt;
   strcat(aux, password);
   strcpy(a.hash, generate_hash(aux));
-
+  printf("g added account \n");
+  fflush(stdout);
   add_account(a);
-  logAccountCreation(server_logfile, id, &srv_accounts[id].account);
+  printf("added account \n");
+  fflush(stdout);
 
   return RC_OK;
 }
@@ -234,9 +242,10 @@ ret_code_t process_request(tlv_request_t request)
   case OP_CREATE_ACCOUNT:
     if (request.value.header.account_id != ADMIN_ACCOUNT_ID)
       reply.value.header.ret_code = RC_OP_NALLOW;
-    else
+    else{
+      printf("oi\n");
       reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password, request.value.header.op_delay_ms);
-
+    }
     reply.length = sizeof(rep_header_t);
     reply.type = OP_CREATE_ACCOUNT;
     reply.value.header.account_id = request.value.create.account_id;
@@ -266,8 +275,10 @@ ret_code_t process_request(tlv_request_t request)
   default:
     break;
   }
-
+  printf("before\n");
+  fflush(stdout);
   write(fd_user, &reply, sizeof(op_type_t) + sizeof(uint32_t) + reply.length);
-
+printf("after\n");
+fflush(stdout);
   return reply.value.header.ret_code;
 }

@@ -12,6 +12,7 @@ void *execute_bank_office(void *threadnum)
        sem_wait(&srv_request_queue_full);
        printf("caught %u\n", getpid());
        request= pop(srv_request_queue);
+       logRequest(server_logfile, pthread_self(), &request);
        process_request(request);
        fflush(stdout);
        sem_post(&srv_request_queue_empty);

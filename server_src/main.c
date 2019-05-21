@@ -3,6 +3,7 @@
 #include "account.h"
 #include "parser.h"
 #include "init_bank.h"
+#include "../auxiliary_src/sope.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
   server_logfile = open(SERVER_LOGFILE, O_CREAT | O_WRONLY | O_APPEND, 0666);
   create_bank(bank);
 
-  int fd, n;
+  int fd, n, sem_value;
   tlv_request_t request;
 
   if (mkfifo(SERVER_FIFO_PATH, 0660) < 0)
@@ -49,12 +50,17 @@ int main(int argc, char *argv[])
     n = read(fd, &request, sizeof(tlv_request_t));
     if (n ==sizeof(tlv_request_t))
     {
+
       logRequest(server_logfile, 0, &request);
 
       sem_wait(&srv_request_queue_empty);
+      sem_getvalue(&srv_request_queue_empty, &sem_value);
+      logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, 0, sem_value);
       push(srv_request_queue, request);
       printf("is in q\n");
       sem_post(&srv_request_queue_full);
+      sem_getvalue(&srv_request_queue_full, &sem_value);
+      logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_POST, SYNC_ROLE_PRODUCER, 0, sem_value);
     }
     sleep(5);
   } while (!end);
