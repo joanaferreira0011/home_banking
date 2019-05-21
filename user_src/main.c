@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    int log_fd = open(USER_LOGFILE, O_WRONLY | O_CREAT, 0660);
+    int log_fd = open(USER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0660);
 
     __debug_log_str("main: starting connection to server fifo");
     if (open_connection_to_srv()) {

@@ -96,4 +96,5 @@ int read_response(tlv_reply_t *buffer) {
     buffer->type = type;
     buffer->length = length;
     buffer->value = value;
+    return 0;
 }
