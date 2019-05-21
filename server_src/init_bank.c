@@ -67,13 +67,14 @@ int create_bank(init_bank_t bank)
 
 int add_account(bank_account_t account)
 {
-  pthread_mutex_lock(&srv_accounts[account.account_id].mut);
   logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, account.account_id);
+  pthread_mutex_lock(&srv_accounts[account.account_id].mut);
+
 
   if (srv_accounts[account.account_id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
   {
     srv_accounts[account.account_id].account = account;
-    logAccountCreation(server_logfile, account.account_id, &account);
+    logAccountCreation(server_logfile, pthread_self(), &account);
     pthread_mutex_unlock(&srv_accounts[account.account_id].mut);
     logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, account.account_id);
     return 0;
@@ -158,10 +159,15 @@ ret_code_t check_balance(uint32_t id, uint32_t delay, uint32_t *balance_buffer)
   if (id == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
+
   pthread_mutex_lock(&srv_accounts[id].mut);
+  logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, id);
+  if(srv_accounts[id].account.account_id == EMPTY_BANK_ACCOUNT_ID)
+    return RC_ID_NOT_FOUND;
   usleep(delay);
   (*balance_buffer) = srv_accounts[id].account.balance;
   pthread_mutex_unlock(&srv_accounts[id].mut);
+  logSyncMech(server_logfile, pthread_self(), SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, id);
   return RC_OK;
 }
 
@@ -241,20 +247,22 @@ ret_code_t shutdown(tlv_request_t request)
 ret_code_t process_request(tlv_request_t request)
 {
   tlv_reply_t reply;
-  char pid[WIDTH_ID];
-  char fifo_name[USER_FIFO_PATH_LEN];
-  sprintf(pid, "%d", request.value.header.pid);
-  strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
-  strcat(fifo_name, pid);
+  char* fifo_name = malloc(USER_FIFO_PATH_LEN + 1);
+  snprintf(fifo_name, USER_FIFO_PATH_LEN, "%s%05d", USER_FIFO_PATH_PREFIX,request.value.header.pid);
+
   int fd_user = open(fifo_name, O_WRONLY);
 
-  if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account)))
+  if (!(verify_account(request.value.header.account_id, request.value.header.password, srv_accounts[ADMIN_ACCOUNT_ID].account))){
     reply.value.header.ret_code = RC_LOGIN_FAIL;
+    printf("wrong login\n");
+  }
   switch (request.type)
   {
   case OP_CREATE_ACCOUNT:
-    if (request.value.header.account_id != ADMIN_ACCOUNT_ID)
+    if (request.value.header.account_id != ADMIN_ACCOUNT_ID){
+      printf("not admin\n");
       reply.value.header.ret_code = RC_OP_NALLOW;
+    }
     else{
       printf("oi\n");
       reply.value.header.ret_code = create_account(request.value.create.account_id, request.value.create.balance, request.value.create.password, request.value.header.op_delay_ms);
@@ -289,10 +297,9 @@ ret_code_t process_request(tlv_request_t request)
   default:
     break;
   }
-  printf("before\n");
-  fflush(stdout);
-  write(fd_user, &reply, sizeof(op_type_t) + sizeof(uint32_t) + reply.length);
-printf("after\n");
-fflush(stdout);
+
+  write(fd_user, &reply, sizeof(tlv_reply_t));
+  logReply(server_logfile, pthread_self(), &reply);
+  close(fd_user);
   return reply.value.header.ret_code;
 }

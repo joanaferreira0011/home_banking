@@ -52,15 +52,14 @@ int main(int argc, char *argv[])
     {
 
       logRequest(server_logfile, 0, &request);
-
-      sem_wait(&srv_request_queue_empty);
       sem_getvalue(&srv_request_queue_empty, &sem_value);
-      logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, 0, sem_value);
+      logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, request.value.header.pid, sem_value);
+      sem_wait(&srv_request_queue_empty);
+
       push(srv_request_queue, request);
-      printf("is in q\n");
       sem_post(&srv_request_queue_full);
       sem_getvalue(&srv_request_queue_full, &sem_value);
-      logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_POST, SYNC_ROLE_PRODUCER, 0, sem_value);
+      logSyncMechSem(server_logfile, 0, SYNC_OP_SEM_POST, SYNC_ROLE_PRODUCER, request.value.header.pid, sem_value);
     }
     sleep(5);
   } while (!end);

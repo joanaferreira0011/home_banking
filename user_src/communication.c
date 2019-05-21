@@ -98,23 +98,26 @@ int send_request(tlv_request_t request) {
 }
 
 int read_response(tlv_reply_t *buffer) {
-    op_type_t type;
-    uint32_t length;
-    rep_value_t value;
-    __debug_log_str("Trying first read");
-    if (read(local_fifo_fd, &type, sizeof(op_type_t)) <= 0) {
-        __debug_log_str("Failed first read");
-    }
-    __debug_log_str("Trying second read");
-    if (read(local_fifo_fd, &length, sizeof(uint32_t)) <= 0) {
-        __debug_log_str("Failed second read");
-    }
-    __debug_log_str("Trying third read");
-    if (read(local_fifo_fd, &value, length) <= 0) {
-        __debug_log_str("Failed third read");
-    }
-    buffer->type = type;
-    buffer->length = length;
-    buffer->value = value;
+  if (read(local_fifo_fd, buffer, sizeof(tlv_reply_t)) <= 0) {
+      __debug_log_str("Failed first read");
+  }
+    // op_type_t type;
+    // uint32_t length;
+    // rep_value_t value;
+    // __debug_log_str("Trying first read");
+    // if (read(local_fifo_fd, &type, sizeof(op_type_t)) <= 0) {
+    //     __debug_log_str("Failed first read");
+    // }
+    // __debug_log_str("Trying second read");
+    // if (read(local_fifo_fd, &length, sizeof(uint32_t)) <= 0) {
+    //     __debug_log_str("Failed second read");
+    // }
+    // __debug_log_str("Trying third read");
+    // if (read(local_fifo_fd, &value, length) <= 0) {
+    //     __debug_log_str("Failed third read");
+    // }
+    // buffer->type = type;
+    // buffer->length = length;
+    // buffer->value = value;
     return 0;
 }
