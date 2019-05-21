@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   if ((fd = open(SERVER_FIFO_PATH, O_RDONLY)) != -1)
     printf("FIFO '/tmp/secure_srv' openned in READONLY mode\n");
 
-close_bank_offices();
+//close_bank_offices();
 
 
   do
