@@ -52,8 +52,8 @@ Mkfile.old
 dkms.conf
 
 .*
-server_src/server
-user_src/user
+server
+user
 slog.txt
 ulog.txt
 !user_src/log.o
