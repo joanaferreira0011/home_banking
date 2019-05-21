@@ -165,7 +165,7 @@ ret_code_t check_balance(uint32_t id, uint32_t delay, uint32_t *balance_buffer)
   return RC_OK;
 }
 
-ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t delay, uint32_t *balance)
+ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t delay, uint32_t  *balance_buffer)
 {
   if (src == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
@@ -273,7 +273,7 @@ ret_code_t process_request(tlv_request_t request)
   case OP_TRANSFER:
     reply.value.header.ret_code = transfer(request.value.header.account_id,
       request.value.transfer.account_id, request.value.transfer.amount,
-      request.value.header.op_delay_ms. &(reply.value.transfer.balance));
+      request.value.header.op_delay_ms, &(reply.value.transfer.balance));
     reply.length = sizeof(rep_header_t) + sizeof(rep_transfer_t);
     reply.type = OP_TRANSFER;
     reply.value.header.account_id = request.value.header.account_id;
