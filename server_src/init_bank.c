@@ -153,19 +153,19 @@ ret_code_t create_account(int id, float balance, char password[MAX_PASSWORD_LEN]
   return RC_OK;
 }
 
-ret_code_t check_balance(uint32_t id, uint32_t delay)
+ret_code_t check_balance(uint32_t id, uint32_t delay, uint32_t *balance_buffer)
 {
   if (id == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
 
   pthread_mutex_lock(&srv_accounts[id].mut);
   usleep(delay);
-  uint32_t balance = srv_accounts[id].account.balance;
+  (*balance_buffer) = srv_accounts[id].account.balance;
   pthread_mutex_unlock(&srv_accounts[id].mut);
   return RC_OK;
 }
 
-ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t delay)
+ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t delay, uint32_t *balance)
 {
   if (src == ADMIN_ACCOUNT_ID)
     return RC_OP_NALLOW;
@@ -184,8 +184,13 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
   if (src == dest)
     return RC_SAME_ID;
 
-  pthread_mutex_lock(&srv_accounts[src].mut);
-  pthread_mutex_lock(&srv_accounts[dest].mut);
+  if (src < dest) {
+    pthread_mutex_lock(&srv_accounts[src].mut);
+    pthread_mutex_lock(&srv_accounts[dest].mut);
+  } else {
+    pthread_mutex_lock(&srv_accounts[dest].mut);
+    pthread_mutex_lock(&srv_accounts[src].mut);
+  }
 
   if (srv_accounts[src].account.balance < amount)
   {
@@ -197,10 +202,18 @@ ret_code_t transfer(uint32_t src, u_int32_t dest, uint32_t amount, uint32_t dela
   if (srv_accounts[dest].account.balance + amount > MAX_BALANCE)
     return RC_TOO_HIGH;
 
-  srv_accounts[src].account.balance = srv_accounts[src].account.balance - amount;
-  srv_accounts[dest].account.balance = srv_accounts[dest].account.balance + amount;
-  pthread_mutex_unlock(&srv_accounts[src].mut);
-  pthread_mutex_unlock(&srv_accounts[dest].mut);
+  srv_accounts[src].account.balance -= amount;
+  srv_accounts[dest].account.balance += amount;
+  (*balance_buffer) = srv_accounts[src].account.balance;
+
+  if (src < dest) {
+    pthread_mutex_unlock(&srv_accounts[src].mut);
+    pthread_mutex_unlock(&srv_accounts[dest].mut);
+  } else {
+    pthread_mutex_unlock(&srv_accounts[dest].mut);
+    pthread_mutex_unlock(&srv_accounts[src].mut);
+  }
+
   return RC_OK;
 }
 
@@ -251,18 +264,19 @@ ret_code_t process_request(tlv_request_t request)
     reply.value.header.account_id = request.value.create.account_id;
     break;
   case OP_BALANCE:
-    reply.value.header.ret_code = check_balance(request.value.create.account_id, request.value.header.op_delay_ms);
+    reply.value.header.ret_code = check_balance(request.value.create.account_id,
+      request.value.header.op_delay_ms, &(reply.value.balance.balance));
     reply.length = sizeof(rep_header_t) + sizeof(rep_balance_t);
     reply.type = OP_BALANCE;
     reply.value.header.account_id = request.value.header.account_id;
-    reply.value.balance.balance = srv_accounts[request.value.header.account_id].account.balance;
     break;
   case OP_TRANSFER:
-    reply.value.header.ret_code = transfer(request.value.header.account_id, request.value.transfer.account_id, request.value.transfer.amount, request.value.header.op_delay_ms);
+    reply.value.header.ret_code = transfer(request.value.header.account_id,
+      request.value.transfer.account_id, request.value.transfer.amount,
+      request.value.header.op_delay_ms. &(reply.value.transfer.balance));
     reply.length = sizeof(rep_header_t) + sizeof(rep_transfer_t);
     reply.type = OP_TRANSFER;
     reply.value.header.account_id = request.value.header.account_id;
-    reply.value.transfer.balance = request.value.transfer.amount;
     break;
   case OP_SHUTDOWN:
     reply.value.header.ret_code = shutdown(request);
