@@ -1,5 +1,6 @@
 #include "bank_office.h"
 #include "init_bank.h"
+#include "../auxiliary_src/sope.h"
 #include <stdio.h>
 
 
