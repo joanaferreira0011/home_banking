@@ -1,5 +1,7 @@
 # Project properties
-PROGRAM = ../server
+PROGRAM = server
+PROGDIR = ..
+LOGFILE = slog.txt
 
 #source options
 C_FILES := $(wildcard *.c)
@@ -13,6 +15,9 @@ OBJS += log.o
 CFLAGS =  -pedantic -D_REENTRANT -pthread -Wall
 LDFLAGS =
 LDLIBS =
+
+PROGRAM := $(PROGDIR)/$(PROGRAM)
+LOGFILE := $(PROGDIR)/$(LOGFILE)
 
 all: $(PROGRAM)
 
@@ -39,7 +44,7 @@ $(BUILDDIR)/%.o: %.c $(BUILDDIR)
 
 
 clean:
-	rm -f .depend $(PROGRAM)
+	rm -f .depend $(PROGRAM) $(LOGFILE)
 	rm -rf $(BUILDDIR)
 
 $(BUILDDIR):
